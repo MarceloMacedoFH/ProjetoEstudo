@@ -1,0 +1,26 @@
+/* static/css/style.css */
+
+/* Estilos Personalizados - Tema Loja de Noivas / Atelier */
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #FAFAFA; /* Off-white de fundo limpo e puro */
+}
+
+h1, h2, h3, .brand-font {
+    font-family: 'Cormorant Garamond', serif;
+}
+
+/* Customizações de cores com tema Noivas */
+.bg-sidebar { 
+    background-color: #F5EBE6; /* Rosa quartzo bem suave / Tom Nude elegante */
+} 
+
+.text-accent { 
+    color: #D4AF37; /* Dourado / Champanhe para destaques */
+}
+
+/* Efeito Hover nos links da barra lateral */
+.hover-link:hover { 
+    color: #C08A80; /* Rosa antigo suave */
+    background-color: #FFFFFF; 
+}
