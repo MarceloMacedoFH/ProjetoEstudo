@@ -21,9 +21,28 @@
         </div>
 
         <nav class="flex-1 p-4 space-y-1 overflow-y-auto text-sm text-stone-600 font-medium">
-            <a href="#" class="flex items-center justify-between px-4 py-2.5 rounded-lg transition-colors hover-link">
-                <span>Cadastro</span>
-            </a>
+    
+            <div>
+                <button id="btn-cadastro" class="w-full flex items-center justify-between px-4 py-2.5 rounded-lg transition-colors hover-link focus:outline-none">
+                    <span>Cadastro</span>
+                    <svg id="seta-cadastro" class="w-4 h-4 transform transition-transform duration-250 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <div id="submenu-cadastro" class="hidden pl-6 mt-1 space-y-1 border-l border-stone-300/40 dark:border-stone-700/50 ml-4">
+                    <a href="#" class="flex items-center px-4 py-2 rounded-lg transition-colors hover-link text-xs">
+                        <span>Categorias</span>
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-2 rounded-lg transition-colors hover-link text-xs">
+                        <span>Clientes</span>
+                    </a>
+                    <a href="#" class="flex items-center px-4 py-2 rounded-lg transition-colors hover-link text-xs">
+                        <span>Produtos</span>
+                    </a>
+                </div>
+            </div>
+        
             <a href="#" class="flex items-center justify-between px-4 py-2.5 rounded-lg transition-colors hover-link">
                 <span>Recentes</span>
             </a>
@@ -53,6 +72,19 @@
             {% endblock %}
         </div>
     </main>
+
+<script>
+    document.getElementById('btn-cadastro').addEventListener('click', function() {
+        const submenu = document.getElementById('submenu-cadastro');
+        const seta = document.getElementById('seta-cadastro');
+        
+        // Alterna a visibilidade do submenu
+        submenu.classList.toggle('hidden');
+        
+        // Gira a seta em 180 graus quando aberto
+        seta.classList.toggle('rotate-180');
+    });
+</script>
 
 </body>
 </html>
