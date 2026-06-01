@@ -1,26 +1,64 @@
 /* static/css/style.css */
 
-/* Estilos Personalizados - Tema Loja de Noivas / Atelier */
+/* --- CONFIGURAÇÕES GERAIS --- */
 body {
     font-family: 'Montserrat', sans-serif;
-    background-color: #FAFAFA; /* Off-white de fundo limpo e puro */
+    background-color: #FAFAFA; /* Off-white (Modo Claro) */
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1, h2, h3, .brand-font {
     font-family: 'Cormorant Garamond', serif;
 }
 
-/* Customizações de cores com tema Noivas */
+/* --- MODO CLARO (PADRÃO) --- */
 .bg-sidebar { 
-    background-color: #F5EBE6; /* Rosa quartzo bem suave / Tom Nude elegante */
+    background-color: #F5EBE6; /* Rosa quartzo / Nude */
 } 
-
 .text-accent { 
-    color: #D4AF37; /* Dourado / Champanhe para destaques */
+    color: #D4AF37; /* Dourado */
+}
+.hover-link:hover { 
+    color: #C08A80; 
+    background-color: #FFFFFF; 
 }
 
-/* Efeito Hover nos links da barra lateral */
-.hover-link:hover { 
-    color: #C08A80; /* Rosa antigo suave */
-    background-color: #FFFFFF; 
+/* --- MODO ESCURO AUTOMÁTICO (Tema do Usuário) --- */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #121212; /* Fundo escuro sofisticado */
+        color: #E0E0E0;
+    }
+
+    /* Sobrescrevendo as classes para o modo noturno do Atelier */
+    .bg-sidebar { 
+        background-color: #1A1513; /* Marrom bem escuro/café, quase preto */
+    }
+    
+    /* O topo e áreas brancas passam a ser grafite escuro */
+    .bg-white {
+        background-color: #1E1E1E !important;
+    }
+    
+    /* Ajuste de bordas para não estourarem no escuro */
+    .border-stone-100, .border-stone-200\/60, .border-t {
+        border-color: #2D2622 !important;
+    }
+
+    /* Links no modo escuro */
+    .text-stone-600 {
+        color: #C5B3AB !important;
+    }
+    .text-stone-800 {
+        color: #F5EBE6 !important;
+    }
+    
+    .hover-link:hover { 
+        color: #E8D8CE; 
+        background-color: #2D2421; /* Destaque sutil no hover noturno */
+    }
+    
+    .bg-stone-100\/50 {
+        background-color: #15110F !important;
+    }
 }
