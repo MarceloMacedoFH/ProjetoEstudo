@@ -17,10 +17,17 @@ class CategoriaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Se estamos editando uma categoria existente, removemos ela mesma das opções
-        # para evitar que ela seja selecionada como sua própria "categoria pai".
+        
+        # Filtro: Apenas categorias principais (sem pai) que ainda não possuem subcategorias.
+        # Isso garante uma hierarquia de no máximo 2 níveis e evita que uma categoria 
+        # que já é subcategoria se torne pai de outra.
+        qs = Categoria.objects.filter(categoria_pai__isnull=True)
+
+        # Se for edição, garantimos que a categoria atual não apareça na lista
         if self.instance and self.instance.pk:
-            self.fields['categoria_pai'].queryset = Categoria.objects.exclude(pk=self.instance.pk)
+            qs = qs.exclude(pk=self.instance.pk)
+
+        self.fields['categoria_pai'].queryset = qs
 
     def clean(self):
         cleaned_data = super().clean()
