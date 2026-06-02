@@ -1,10 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import F
 from django.db.models.functions import Coalesce
 from .models import Categoria
 from .forms import CategoriaForm
 
 
+#Metodos Categorias
 def criar_categoria(request):
     if request.method == 'POST':
         form = CategoriaForm(request.POST)
@@ -20,6 +21,22 @@ def criar_categoria(request):
     
     return render(request, 'estoque/categoria/criar_categoria.html', context)
 
+
+def editar_categoria(request, pk):
+    categoria = get_object_or_404(Categoria, pk=pk)
+    if request.method == 'POST':
+        form = CategoriaForm(request.POST, instance=categoria)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_categorias')
+    else:
+        form = CategoriaForm(instance=categoria)
+    
+    context = {
+        'form': form,
+        'is_edit': True
+    }
+    return render(request, 'estoque/categoria/criar_categoria.html', context)
 
 
 def lista_categoria(request):
@@ -42,6 +59,8 @@ def lista_categoria(request):
     return render(request, 'estoque/categoria/lista_categoria.html', context)
 
 
+
+#Metodos Produtos 
 def lista_estoque(request):
 
     return render(request, 'estoque/produto/lista_produto.html')
