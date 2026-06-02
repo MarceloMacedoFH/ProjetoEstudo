@@ -1,1 +1,113 @@
-{% extends "base.html" %}   
+{% extends "base.html" %}
+
+{% block title %}Lista de Categorias - Center Noivas{% endblock %}
+
+{% block content %}
+<div class="bg-white dark:bg-stone-850 rounded-xl p-6 shadow-sm border border-stone-100 dark:border-stone-800">
+    
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-6 border-b border-stone-100 dark:border-stone-800 gap-4">
+        <div>
+            <h1 class="brand-font text-3xl font-light text-stone-800 dark:text-stone-100">Categorias</h1>
+            <p class="text-xs text-stone-400 dark:text-stone-500 mt-1">Gerencie a árvore hierárquica de categorias e subcategorias do atelier.</p>
+        </div>
+        <div>
+            <a href="#" class="inline-flex items-center justify-center px-4 py-2 text-xs font-semibold tracking-wider text-white bg-stone-800 hover:bg-stone-700 dark:bg-stone-700 dark:hover:bg-stone-600 rounded-lg transition-colors shadow-sm uppercase">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Nova Categoria
+            </a>
+        </div>
+    </div>
+
+    <div class="overflow-x-auto mt-6">
+        <table class="w-full text-left border-collapse text-sm text-stone-600 dark:text-stone-300">
+            <thead>
+                <tr class="border-b border-stone-200/80 dark:border-stone-800 bg-stone-50/50 dark:bg-stone-900/30 text-xs text-stone-400 dark:text-stone-500 uppercase tracking-wider font-semibold">
+                    <th class="py-3 px-4">Descrição</th>
+                    <th class="py-3 px-4">Tipo / Estrutura</th>
+                    <th class="py-3 px-4 text-center w-36">Ações</th>
+                </tr>
+            </thead>
+            
+            {% for pai in categorias_pais %}
+            <tbody class="divide-y divide-stone-100 dark:divide-stone-800/60 font-medium">
+                
+                <tr class="bg-stone-50/40 dark:bg-stone-900/10 border-t border-stone-200 dark:border-stone-800">
+                    <td class="py-4 px-4 font-bold text-stone-900 dark:text-white uppercase tracking-wide">
+                        {{ pai.descricao }}
+                    </td>
+                    <td class="py-4 px-4 text-xs">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-400 border border-amber-200/30 dark:border-amber-900/30">
+                            Categoria Principal
+                        </span>
+                    </td>
+                    <td class="py-4 px-4 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <a href="#" class="p-1.5 rounded-md text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" title="Editar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </a>
+                            <a href="#" class="p-1.5 rounded-md text-stone-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors" title="Excluir">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+
+                {% for filho in pai.subcategorias.all %}
+                <tr class="hover:bg-stone-50/20 dark:hover:bg-stone-900/5 transition-colors">
+                    <td class="py-3 px-4 text-stone-600 dark:text-stone-300 font-normal">
+                        <div class="flex items-center pl-6">
+                            <svg class="w-3.5 h-3.5 mr-2 text-stone-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+                            </svg>
+                            {{ filho.descricao }}
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 text-xs">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full font-medium bg-stone-100 dark:bg-stone-800/60 text-stone-500 dark:text-stone-400 border border-stone-200/40 dark:border-stone-700/50">
+                            Subcategoria de {{ pai.descricao }}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="flex items-center justify-center space-x-2">
+                            <a href="#" class="p-1.5 rounded-md text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors" title="Editar">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                            </a>
+                            <a href="#" class="p-1.5 rounded-md text-stone-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors" title="Excluir">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr class="text-stone-400 dark:text-stone-600 font-normal italic bg-stone-50/10">
+                    <td colspan="3" class="py-2 px-4 pl-12 text-xs">
+                        Nenhuma subcategoria vinculada a esta categoria.
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+            {% empty %}
+            <tbody>
+                <tr>
+                    <td colspan="3" class="py-12 text-center text-stone-400 dark:text-stone-600 font-normal italic">
+                        Nenhuma categoria cadastrada até o momento.
+                    </td>
+                </tr>
+            </tbody>
+            {% endfor %}
+        </table>
+    </div>
+
+</div>
+{% endblock %}

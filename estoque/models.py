@@ -2,7 +2,8 @@ from django.db import models
 
 # Create your models here.
 class Categoria(models.Model):
-    descricao = models.CharField(max_length=100, unique=True, verbose_name='descricao')
+    # Removemos o unique=True daqui
+    descricao = models.CharField(max_length=100, verbose_name='Descrição')
     categoria_pai = models.ForeignKey(
         'self',
         on_delete=models.PROTECT,
@@ -12,10 +13,12 @@ class Categoria(models.Model):
         verbose_name='Categoria Pai'
     )
 
-    class Meta():
+    class Meta:
         verbose_name = 'Categoria'
         verbose_name_plural = 'Categorias'
         ordering = ['descricao']
+        # Garante que não existam duas subcategorias "SLIM" dentro de "TERNO"
+        unique_together = ('descricao', 'categoria_pai')
 
     def __str__(self):
         full_path = [self.descricao]

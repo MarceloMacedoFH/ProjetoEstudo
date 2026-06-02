@@ -14,4 +14,6 @@ class ProdutoAdmin(admin.ModelAdmin):
 @admin.register(Categoria)
 class CategoriaAdmin(admin.ModelAdmin):
     # As colunas que você quer que apareçam na listagem
-    list_display = ('descricao', 'categoria_pai',)
+    list_display = ('categoria_pai', 'descricao',)
+
+
