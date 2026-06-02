@@ -1,4 +1,6 @@
 from django.shortcuts import render, redirect
+from django.db.models import F
+from django.db.models.functions import Coalesce
 from .models import Categoria
 from .forms import CategoriaForm
 
@@ -21,12 +23,20 @@ def criar_categoria(request):
 
 
 def lista_categoria(request):
-    # Buscamos apenas as categorias PAI (principais)
-    # prefetch_related carrega todas as subcategorias de uma vez, evitando lentidão
-    categorias_pais = Categoria.objects.filter(categoria_pai__isnull=True).prefetch_related('subcategorias')
+    # Ordenação Hierárquica:
+    # 1. Agrupamos as categorias pelo ID do pai (ou pelo próprio ID se for pai).
+    # 2. Dentro do grupo, garantimos que o Pai (null) venha antes dos filhos.
+    # 3. Ordenamos alfabeticamente entre irmãos.
+    categorias = Categoria.objects.annotate(
+        sort_group=Coalesce('categoria_pai_id', 'id')
+    ).order_by(
+        'sort_group', 
+        F('categoria_pai_id').asc(nulls_first=True), 
+        'descricao'
+    ).select_related('categoria_pai')
 
     context = {
-        'categorias_pais': categorias_pais
+        'categorias': categorias
     }
 
     return render(request, 'estoque/categoria/lista_categoria.html', context)

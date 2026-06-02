@@ -25,44 +25,52 @@
         <table class="w-full text-left border-separate border-spacing-y-4">
             <thead>
                 <tr class="text-[12px] uppercase tracking-[0.2em] text-stone-600 font-bold">
-                    <th class="px-8 pb-2">Categoria Principal</th>
-                    <th class="px-8 pb-2">Subcategorias Vinculadas</th>
-                    <th class="px-8 pb-2 text-right">Gestão</th>
+                    <th class="px-8 pb-2">Identificação da Categoria</th>
+                    <th class="px-8 pb-2">Tipo / Hierarquia</th>
+                    <th class="px-8 pb-2 text-right">Ações de Gestão</th>
                 </tr>
             </thead>
             
-            {% for pai in categorias_pais %}
             <tbody>
-                <tr class="group cursor-pointer">
+                {% for cat in categorias %}
+                <tr class="group">
                     <td class="px-8 py-6 bg-white/40 backdrop-blur-sm rounded-l-[2rem] border-y border-l border-stone-100/50 group-hover:bg-white transition-all duration-300">
-                        <span class="brand-font text-xl text-stone-700 dark:text-white uppercase">{{ pai.descricao }}</span>
-                    </td>
-                    <td class="px-8 py-6 bg-white/40 backdrop-blur-sm border-y border-stone-100/50 group-hover:bg-white transition-all duration-300">
-                        <div class="flex flex-wrap gap-2">
-                            {% for filho in pai.subcategorias.all %}
-                                <span class="px-3 py-1 bg-stone-200/50 text-stone-700 text-[11px] uppercase tracking-wider rounded-full border border-stone-300 font-semibold">{{ filho.descricao }}</span>
-                            {% empty %}
-                                <span class="text-stone-300 italic text-xs font-light">Nenhuma subcategoria</span>
-                            {% endfor %}
+                        <div class="flex items-center {% if cat.categoria_pai %}pl-12{% endif %}">
+                            {% if cat.categoria_pai %}
+                                <!-- Ícone de ramificação para subcategorias -->
+                                <svg class="w-4 h-4 mr-3 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                            {% endif %}
+                            <span class="brand-font text-xl {% if cat.categoria_pai %}text-stone-500 italic{% else %}text-stone-700 dark:text-white uppercase{% endif %}">
+                                {{ cat.descricao }}
+                            </span>
                         </div>
                     </td>
+                    <td class="px-8 py-6 bg-white/40 backdrop-blur-sm border-y border-stone-100/50 group-hover:bg-white transition-all duration-300">
+                        {% if cat.categoria_pai %}
+                            <span class="px-3 py-1 bg-stone-100 text-stone-500 text-[10px] uppercase tracking-wider rounded-full border border-stone-200 font-medium">
+                                Subcategoria de: <strong class="text-stone-700">{{ cat.categoria_pai.descricao }}</strong>
+                            </span>
+                        {% else %}
+                            <span class="px-3 py-1 bg-[#B4977A]/10 text-[#B4977A] text-[10px] uppercase tracking-wider rounded-full border border-[#B4977A]/20 font-bold">
+                                Categoria Principal
+                            </span>
+                        {% endif %}
+                    </td>
                     <td class="px-8 py-6 bg-white/40 backdrop-blur-sm rounded-r-[2rem] border-y border-r border-stone-100/50 group-hover:bg-white transition-all duration-300 text-right">
-                        <a href="#" class="inline-flex items-center text-[10px] uppercase tracking-widest text-[#B4977A] hover:text-[#8C7356] font-bold transition-colors">
+                        <a href="#" class="inline-flex items-center text-[10px] uppercase tracking-widest text-[#B4977A] hover:text-[#8C7356] font-extrabold transition-colors">
                             Editar
                             <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                         </a>
                     </td>
                 </tr>
-            </tbody>
-            {% empty %}
-            <tbody>
+                {% empty %}
                 <tr>
                     <td colspan="3" class="py-12 text-center text-stone-400 dark:text-stone-600 font-normal italic">
                         Nenhuma categoria cadastrada até o momento.
                     </td>
                 </tr>
+                {% endfor %}
             </tbody>
-            {% endfor %}
         </table>
     </div>
 
