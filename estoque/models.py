@@ -30,7 +30,7 @@ class Categoria(models.Model):
 
 
 class Status(models.Model):
-    descricao = models.CharField(max_length=50, blank=False, null=False, unique=True, verbose_name='descricao')
+    descricao = models.CharField(max_length=50, blank=False, null=False, unique=True, verbose_name='Descrição')
 
     class Meta():
         verbose_name = 'Status'
@@ -42,7 +42,7 @@ class Status(models.Model):
 
 
 class Conservacao(models.Model):
-    descricao = models.CharField(max_length=50, blank=False, null=False, unique=True, verbose_name='descricao')
+    descricao = models.CharField(max_length=50, blank=False, null=False, unique=True, verbose_name='Descrição')
     
     class Meta():
         verbose_name = 'Conservação'
@@ -79,7 +79,7 @@ class Produto(models.Model):
     ]
 
     # 1. Informações Básicas
-    descricao = models.CharField(max_length=150, null=False, blank=False, verbose_name="Descricao do Produto")
+    descricao = models.CharField(max_length=150, null=False, blank=False, verbose_name="Descrição do Produto")
     codigo = models.CharField(max_length=50, null=False, blank=False, unique=True, verbose_name="Código Produto")
     codigo_barras = models.CharField(max_length=100, blank=True, null=True, verbose_name="Código de Barras / RFID")
     observacao = models.TextField(blank=True, null=True, verbose_name="Observação do Estilo")
