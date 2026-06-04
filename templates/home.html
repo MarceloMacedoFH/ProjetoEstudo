@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Center Noivas{% endblock %}
+
+{% block content %}
+<div class="premium-card p-10">
+    <div class="mb-12">
+        <h1 class="brand-font text-4xl text-stone-800 mb-2">Painel de Controle</h1>
+        <p class="text-stone-600 font-normal tracking-wide italic">Visão geral das atividades de hoje e pendências</p>
+    </div>
+
+    <!-- Grid de Cards de Indicadores -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+
+        <!-- Card: Alugueis Efetuados -->
+        <div class="bg-white/60 border border-stone-100 p-8 rounded-[2rem] hover:shadow-xl transition-all duration-500 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-stone-100 rounded-2xl group-hover:bg-[#B4977A]/10 transition-colors">
+                    <svg class="w-6 h-6 text-stone-500 group-hover:text-[#B4977A]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                    </svg>
+                </div>
+                <span class="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Hoje</span>
+            </div>
+            <div class="text-3xl font-bold text-stone-800 mb-1">{{ total_alugados}}</div>
+            <div class="text-xs text-stone-500 uppercase font-semibold tracking-wider">Aluguéis Efetuados</div>
+        </div>
+        
+        <!-- Card: Provas do Dia -->
+        <div class="bg-white/60 border border-stone-100 p-8 rounded-[2rem] hover:shadow-xl transition-all duration-500 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-stone-100 rounded-2xl group-hover:bg-[#B4977A]/10 transition-colors">
+                    <svg class="w-6 h-6 text-stone-500 group-hover:text-[#B4977A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                </div>
+                <span class="text-[10px] uppercase tracking-widest text-stone-400 font-bold">Hoje</span>
+            </div>
+            <div class="text-3xl font-bold text-stone-800 mb-1">{{ total_provas }}</div>
+            <div class="text-xs text-stone-500 uppercase font-semibold tracking-wider">Provas Agendadas</div>
+        </div>
+
+        <!-- Card: Retiradas -->
+        <div class="bg-white/60 border border-stone-100 p-8 rounded-[2rem] hover:shadow-xl transition-all duration-500 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-stone-100 rounded-2xl group-hover:bg-emerald-50 transition-colors">
+                    <svg class="w-6 h-6 text-stone-500 group-hover:text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                </div>
+                <span class="text-[10px] uppercase tracking-widest text-stone-400 font-bold text-emerald-600">Saída</span>
+            </div>
+            <div class="text-3xl font-bold text-stone-800 mb-1">{{ total_retiradas }}</div>
+            <div class="text-xs text-stone-500 uppercase font-semibold tracking-wider">Peças para Retirar</div>
+        </div>
+
+        <!-- Card: Devoluções -->
+        <div class="bg-white/60 border border-stone-100 p-8 rounded-[2rem] hover:shadow-xl transition-all duration-500 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-stone-100 rounded-2xl group-hover:bg-blue-50 transition-colors">
+                    <svg class="w-6 h-6 text-stone-500 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 15v-1a4 4 0 00-4-4H8m0 0l3 3m-3-3l3-3m9 14V5a2 2 0 00-2-2H6a2 2 0 00-2 2v16l4-2 4 2 4-2 4 2z"></path></svg>
+                </div>
+                <span class="text-[10px] uppercase tracking-widest text-stone-400 font-bold text-blue-600">Retorno</span>
+            </div>
+            <div class="text-3xl font-bold text-stone-800 mb-1">{{ total_devolucoes }}</div>
+            <div class="text-xs text-stone-500 uppercase font-semibold tracking-wider">Devoluções Esperadas</div>
+        </div>
+
+        <!-- Card: Atrasos -->
+        <div class="bg-white/60 border border-stone-100 p-8 rounded-[2rem] hover:shadow-xl transition-all duration-500 group">
+            <div class="flex items-center justify-between mb-4">
+                <div class="p-3 bg-stone-100 rounded-2xl group-hover:bg-rose-50 transition-colors">
+                    <svg class="w-6 h-6 text-stone-500 group-hover:text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="text-[10px] uppercase tracking-widest text-rose-600 font-bold animate-pulse">Alerta</span>
+            </div>
+            <div class="text-3xl font-bold text-rose-700 mb-1">{{ total_atrasos }}</div>
+            <div class="text-xs text-stone-500 uppercase font-semibold tracking-wider">Peças Atrasadas</div>
+        </div>
+
+        
+        
+
+    </div>
+</div>
+{% endblock %}

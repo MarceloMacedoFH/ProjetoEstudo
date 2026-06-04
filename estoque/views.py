@@ -5,6 +5,19 @@ from .models import Categoria
 from .forms import CategoriaForm
 
 
+def home(request):
+    # Por enquanto retornamos valores fictícios até que as tabelas de 
+    # agendamentos e locações sejam criadas no models.py
+    context = {
+        'total_provas': 0,
+        'total_retiradas': 0,
+        'total_devolucoes': 0,
+        'total_atrasos': 0,
+        'total_alugados': 0,
+    }
+    return render(request, 'home.html', context)
+
+
 #Metodos Categorias
 def criar_categoria(request):
     if request.method == 'POST':
@@ -36,7 +49,15 @@ def editar_categoria(request, pk):
         'form': form,
         'is_edit': True
     }
-    return render(request, 'estoque/categoria/criar_categoria.html', context)
+    return render(request, 'estoque/categoria/editar_categoria.html', context)
+
+
+def excluir_categoria(request, pk):
+    categoria = get_object_or_404(Categoria, pk=pk)
+    if request.method == 'POST':
+        categoria.delete()
+        return redirect('lista_categorias')
+    return render(request, 'estoque/categoria/confirmar_exclusao.html', {'categoria': categoria})
 
 
 def lista_categoria(request):
