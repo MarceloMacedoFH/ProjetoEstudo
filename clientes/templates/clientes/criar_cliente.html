@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Cliente - Center Noivas{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="premium-card p-10">
+        <div class="mb-10 text-center">
+            <h1 class="brand-font text-4xl text-stone-800 mb-2">Novo Cadastro</h1>
+            <p class="text-stone-600 italic">Insira as informações da cliente abaixo</p>
+        </div>
+
+        <form method="POST" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- Seção: Pessoal -->
+            <div>
+                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-6 border-b border-stone-100 pb-2">Informações Pessoais</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Nome Completo</label>
+                        {{ form.nome }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">CPF</label>
+                        {{ form.cpf }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Data de Nascimento</label>
+                        {{ form.data_nascimento }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção: Contato -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">WhatsApp / Contato</label>
+                    {{ form.contato }}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">E-mail</label>
+                    {{ form.email }}
+                </div>
+            </div>
+
+            <!-- Seção: Endereço -->
+            <div>
+                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-6 border-b border-stone-100 pb-2">Localização</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>{{ form.cep }}</div>
+                    <div class="md:col-span-2">{{ form.endereco }}</div>
+                    <div>{{ form.numero }}</div>
+                    <div>{{ form.bairro }}</div>
+                    <div>{{ form.municipio }}</div>
+                    <div>{{ form.estado }}</div>
+                </div>
+            </div>
+
+            <!-- Observações e Ativo -->
+            <div class="space-y-4">
+                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold border-b border-stone-100 pb-2">Observações</h2>
+                {{ form.observacao }}
+                <div class="flex items-center gap-3 p-4 bg-stone-50 rounded-xl">
+                    {{ form.ativo }}
+                    <span class="text-sm text-stone-700 font-medium">Cliente ativo no sistema</span>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="flex items-center justify-end gap-4 pt-6 border-t border-stone-100">
+                <a href="{% url 'lista_clientes' %}" class="text-stone-400 hover:text-stone-600 font-medium transition-colors">Cancelar</a>
+                <button type="submit" class="px-10 py-4 bg-[#B4977A] text-white font-bold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20">
+                    Salvar Cadastro
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cepField = document.querySelector('#id_cep');
+        const enderecoField = document.querySelector('#id_endereco');
+        const bairroField = document.querySelector('#id_bairro');
+        const municipioField = document.querySelector('#id_municipio');
+        const estadoField = document.querySelector('#id_estado');
+
+        if (cepField) {
+            cepField.addEventListener('blur', function() {
+                // Remove caracteres não numéricos
+                const cep = this.value.replace(/\D/g, '');
+
+                // Valida se o CEP tem 8 dígitos
+                if (cep.length === 8) {
+                    // Feedback visual opcional: desabilitar campos enquanto busca
+                    const fields = [enderecoField, bairroField, municipioField, estadoField];
+                    fields.forEach(f => f.classList.add('opacity-50'));
+
+                    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.erro) {
+                                if (enderecoField) enderecoField.value = data.logradouro;
+                                if (bairroField) bairroField.value = data.bairro;
+                                if (municipioField) municipioField.value = data.localidade;
+                                if (estadoField) estadoField.value = data.uf;
+                            }
+                        })
+                        .catch(error => console.error('Erro ao buscar CEP:', error))
+                        .finally(() => {
+                            fields.forEach(f => f.classList.remove('opacity-50'));
+                        });
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

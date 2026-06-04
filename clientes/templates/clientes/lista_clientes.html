@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Clientes - Center Noivas{% endblock %}
+
+{% block content %}
+<div class="premium-card p-10">
+    <!-- Cabeçalho da Listagem -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
+        <div>
+            <h1 class="brand-font text-4xl text-stone-800 mb-2">Gestão de Clientes</h1>
+            <p class="text-stone-600 font-normal tracking-wide italic">Visualize e gerencie o cadastro de suas clientes</p>
+        </div>
+        
+        <a href="{% url 'criar_cliente' %}" class="inline-flex items-center px-6 py-3 bg-[#B4977A] text-white font-semibold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20 group">
+            <svg class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            Nova Cliente
+        </a>
+    </div>
+
+    <!-- Container da Tabela Elegante -->
+    <div class="overflow-hidden rounded-[2rem] border border-stone-100 bg-white/40 backdrop-blur-sm">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-stone-50/50">
+                    <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">Nome</th>
+                    <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">CPF</th>
+                    <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">Contato</th>
+                    <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">Localização</th>
+                    <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">Aluguéis</th>
+                    <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">Status</th>
+                    <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100 text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-50">
+                {% for cliente in clientes %}
+                <tr class="hover:bg-white/60 transition-colors group">
+                    <td class="px-6 py-5">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-[#B4977A] font-bold text-sm mr-3 border border-stone-200">
+                                {{ cliente.nome|slice:":1"|upper }}
+                            </div>
+                            <span class="font-semibold text-stone-800">{{ cliente.nome }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-5 text-sm text-stone-600">{{ cliente.cpf }}</td>
+                    <td class="px-6 py-5 text-sm text-stone-600">{{ cliente.contato }}</td>
+                    <td class="px-6 py-5 text-sm text-stone-500 italic">
+                        {{ cliente.municipio }}/{{ cliente.estado }}
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-stone-100 text-[#B4977A] text-xs font-bold">
+                            {{ cliente.qtd_alugueis }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-5">
+                        {% if cliente.ativo %}
+                        <span class="inline-flex items-center text-emerald-600 text-[10px] uppercase tracking-widest font-bold">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+                            Ativo
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center text-stone-400 text-[10px] uppercase tracking-widest font-bold">
+                            <span class="w-2 h-2 rounded-full bg-stone-300 mr-2"></span>
+                            Inativo
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-5 text-right">
+                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="#" class="p-2 text-stone-400 hover:text-[#B4977A] transition-colors" title="Editar">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-6 py-20 text-center">
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-10 h-10 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            </div>
+                            <h3 class="text-stone-500 font-medium">Nenhum cliente encontrado</h3>
+                            <p class="text-stone-400 text-sm italic mt-1">Clique em "Nova Cliente" para começar seu catálogo.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
