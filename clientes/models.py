@@ -14,12 +14,12 @@ class Cliente(models.Model):
     # 1. Informações Pessoais
     nome = models.CharField(max_length=200, verbose_name="Nome Completo")
     data_nascimento = models.DateField(null=True, blank=True, verbose_name="Data de Nascimento")
-    rg = models.CharField(max_length=20, blank=True, null=True, verbose_name="RG")
+    rg = models.CharField(max_length=20, unique=True, blank=True, null=True, verbose_name="RG")
     cpf = models.CharField(max_length=14, unique=True, verbose_name="CPF")
     
     # 2. Comunicação
     contato = models.CharField(max_length=20, verbose_name="Telefone/WhatsApp")
-    email = models.EmailField(unique=True, verbose_name="E-mail")
+    email = models.EmailField(blank=True, null=True, verbose_name="E-mail")
     
     # 3. Endereço
     cep = models.CharField(max_length=9, verbose_name="CEP")
