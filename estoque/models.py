@@ -27,6 +27,12 @@ class Categoria(models.Model):
             full_path.append(p.descricao)
             p = p.categoria_pai 
         return ' -> '.join(full_path[::-1])
+    
+    def save(self, *args, **kwargs):
+        # Normalização de dados antes de salvar no banco
+        if self.descricao: self.descricao = self.descricao.upper()
+        
+        super(Categoria, self).save(*args, **kwargs)
 
 
 class Status(models.Model):

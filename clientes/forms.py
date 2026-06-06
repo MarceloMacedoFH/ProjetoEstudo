@@ -10,7 +10,7 @@ class ClienteForm(forms.ModelForm):
             'observacao', 'ativo'
         ]
         widgets = {
-            'data_nascimento': forms.DateInput(attrs={'type': 'date'}),
+            'data_nascimento': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
             'observacao': forms.Textarea(attrs={'rows': 3}),
             'credito': forms.TextInput(attrs={
                 'autocomplete': 'off',
