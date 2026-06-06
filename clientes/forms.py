@@ -5,13 +5,17 @@ class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
         fields = [
-            'nome', 'data_nascimento', 'rg', 'cpf', 'contato', 'email',
+            'nome', 'data_nascimento', 'rg', 'cpf', 'credito', 'contato', 'email',
             'cep', 'endereco', 'numero', 'complemento', 'bairro', 'municipio', 'estado',
             'observacao', 'ativo'
         ]
         widgets = {
             'data_nascimento': forms.DateInput(attrs={'type': 'date'}),
             'observacao': forms.Textarea(attrs={'rows': 3}),
+            'credito': forms.TextInput(attrs={
+                'autocomplete': 'off',
+                'inputmode': 'decimal',
+            }),
         }
 
     def __init__(self, *args, **kwargs):

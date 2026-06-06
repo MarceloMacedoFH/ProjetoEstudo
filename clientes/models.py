@@ -33,6 +33,7 @@ class Cliente(models.Model):
     # 4. Gestão e Histórico
     observacao = models.TextField(blank=True, null=True, verbose_name="Observações Internas")
     qtd_alugueis = models.PositiveIntegerField(default=0, verbose_name="Quantidade de Aluguéis")
+    credito = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Crédito")
     ativo = models.BooleanField(default=True, verbose_name="Cliente Ativo")
     
     # 5. Datas de Controle

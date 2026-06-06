@@ -98,6 +98,12 @@
             <div class="space-y-4">
                 <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold border-b border-stone-100 pb-2">Observações</h2>
                 {{ form.observacao }}
+                <div class="grid grid-cols-1 md:grid-cols-3">
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Crédito</label>
+                        {{ form.credito }}
+                    </div>
+                </div>
                 <div class="flex items-center gap-3 p-4 bg-stone-50 rounded-xl">
                     {{ form.ativo }}
                     <span class="text-sm text-stone-700 font-medium">Cliente ativo no sistema</span>

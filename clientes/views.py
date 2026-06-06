@@ -1,11 +1,28 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Cliente
 from .forms import ClienteForm
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.db.models import Q
 
 def lista_clientes(request):
-    # Buscamos todos os clientes ordenados pelo nome (conforme definido no Meta do Model)
-    clientes = Cliente.objects.all()
-    context = {'clientes': clientes}
+    query = request.GET.get('q')
+    if query:
+        clientes_list = Cliente.objects.filter(
+            Q(nome__icontains=query) | Q(cpf__icontains=query)
+        )
+    else:
+        clientes_list = Cliente.objects.all()
+
+    paginator = Paginator(clientes_list, 50)  # Limite de 50 registros por página
+    page = request.GET.get('page')
+    try:
+        clientes = paginator.page(page)
+    except PageNotAnInteger:
+        clientes = paginator.page(1)
+    except EmptyPage:
+        clientes = paginator.page(paginator.num_pages)
+
+    context = {'clientes': clientes, 'query': query}
     return render(request, 'clientes/lista_clientes.html', context)
 
 def criar_cliente(request):

@@ -11,12 +11,22 @@
             <p class="text-stone-600 font-normal tracking-wide italic">Visualize e gerencie o cadastro de suas clientes</p>
         </div>
         
-        <a href="{% url 'criar_cliente' %}" class="inline-flex items-center px-6 py-3 bg-[#B4977A] text-white font-semibold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20 group">
-            <svg class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-            </svg>
-            Novo Cliente
-        </a>
+        <div class="flex flex-col md:flex-row items-center gap-4">
+            <form method="GET" action="{% url 'lista_clientes' %}" class="relative group">
+                <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Buscar por nome ou CPF..." 
+                    class="pl-11 pr-4 py-3 bg-white border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#B4977A]/20 focus:border-[#B4977A] transition-all w-full md:w-64 lg:w-80 shadow-sm">
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-[#B4977A] transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </form>
+
+            <a href="{% url 'criar_cliente' %}" class="inline-flex items-center px-6 py-3 bg-[#B4977A] text-white font-semibold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20 group shrink-0">
+                <svg class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Novo Cliente
+            </a>
+        </div>
     </div>
 
     <!-- Container da Tabela Elegante -->
@@ -27,7 +37,7 @@
                     <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">Nome</th>
                     <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">CPF</th>
                     <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">Contato</th>
-                    <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">Localização</th>
+                    <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">Crédito</th>
                     <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">Aluguéis</th>
                     <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100">Status</th>
                     <th class="px-6 py-5 text-[10px] uppercase tracking-[0.2em] text-stone-400 font-bold border-b border-stone-100 text-right">Ações</th>
@@ -47,7 +57,7 @@
                     <td class="px-6 py-5 text-sm text-stone-600">{{ cliente.cpf }}</td>
                     <td class="px-6 py-5 text-sm text-stone-600">{{ cliente.contato }}</td>
                     <td class="px-6 py-5 text-sm text-stone-500 italic">
-                        {{ cliente.municipio }}/{{ cliente.estado }}
+                        {{cliente.credito}}
                     </td>
                     <td class="px-6 py-5">
                         <span class="inline-flex items-center px-3 py-1 rounded-full bg-stone-100 text-[#B4977A] text-xs font-bold">
@@ -91,5 +101,30 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Paginação -->
+    {% if clientes.has_other_pages %}
+    <div class="mt-8 flex items-center justify-center gap-2">
+        {% if clientes.has_previous %}
+            <a href="?page={{ clientes.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="p-2 text-stone-400 hover:text-[#B4977A] transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </a>
+        {% endif %}
+
+        {% for num in clientes.paginator.page_range %}
+            {% if clientes.number == num %}
+                <span class="w-10 h-10 flex items-center justify-center rounded-full bg-[#B4977A] text-white text-sm font-bold shadow-md">{{ num }}</span>
+            {% elif num > clientes.number|add:'-3' and num < clientes.number|add:'3' %}
+                <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" class="w-10 h-10 flex items-center justify-center rounded-full text-stone-600 hover:bg-stone-100 transition-colors text-sm font-medium">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if clientes.has_next %}
+            <a href="?page={{ clientes.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="p-2 text-stone-400 hover:text-[#B4977A] transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}
