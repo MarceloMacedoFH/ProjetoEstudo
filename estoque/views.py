@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import F
 from django.db.models.functions import Coalesce
-from .models import Categoria
-from .forms import CategoriaForm
+from .models import Categoria, Status
+from .forms import CategoriaForm, StatusForm
 
 
 def home(request):
@@ -80,8 +80,58 @@ def lista_categoria(request):
     return render(request, 'estoque/categoria/lista_categoria.html', context)
 
 
-
 #Metodos Produtos 
 def lista_estoque(request):
 
     return render(request, 'estoque/produto/lista_produto.html')
+
+
+
+#Metodos Status
+def lista_status(request):
+    status = Status.objects.all()
+    
+    context = {
+        'status': status
+    }
+
+    return render(request, 'estoque/status/lista_status.html', context)
+    
+
+def criar_status(request):
+
+    if request.method == 'POST':
+        form = StatusForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_status')
+    else:
+        form = StatusForm()
+    
+    context = {
+        'form': form
+    }   
+    
+    return render(request, 'estoque/status/criar_status.html', context)
+
+
+def editar_status(request, pk):
+    status = get_object_or_404(Status, pk=pk)
+    if request.method == 'POST':
+        form = StatusForm(request.POST, instance=status)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_status')
+    else:
+        form = StatusForm(instance=status)
+    
+    context = {
+        'form': form,
+        'is_edit': True,
+    }
+
+    return render(request, 'estoque/status/editar_status.html', context)
+
+
+
+    

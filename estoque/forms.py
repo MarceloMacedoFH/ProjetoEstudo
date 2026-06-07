@@ -1,5 +1,5 @@
 from django import forms
-from .models import Categoria
+from .models import Categoria, Status, Conservacao, Cor
 
 class CategoriaForm(forms.ModelForm):
     class Meta:
@@ -40,3 +40,50 @@ class CategoriaForm(forms.ModelForm):
             )
             
         return cleaned_data
+
+class StatusForm(forms.ModelForm):
+    class Meta:
+        model = Status
+        fields = ['descricao', 'ativo']
+        widgets = {
+            'descricao': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Ex: Disponível, Alugado, Lavanderia...'
+            }),
+            'ativo': forms.CheckboxInput(attrs={
+                'class': 'w-5 h-5 rounded border-stone-300 text-[#B4977A] focus:ring-[#B4977A]'
+            }),
+        }
+
+class ConservacaoForm(forms.ModelForm):
+    class Meta:
+        model = Conservacao
+        fields = ['descricao', 'ativo']
+        widgets = {
+            'descricao': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Ex: Novo, Excelente, Com marcas de uso...'
+            }),
+            'ativo': forms.CheckboxInput(attrs={
+                'class': 'w-5 h-5 rounded border-stone-300 text-[#B4977A] focus:ring-[#B4977A]'
+            }),
+        }
+
+class CorForm(forms.ModelForm):
+    class Meta:
+        model = Cor
+        fields = ['descricao', 'codigo_hex', 'ativo']
+        widgets = {
+            'descricao': forms.TextInput(attrs={
+                'class': 'form-control', 
+                'placeholder': 'Ex: Off-White, Marsala, Azul Serenity...'
+            }),
+            'codigo_hex': forms.TextInput(attrs={
+                'class': 'form-control h-12 p-1', 
+                'type': 'color',
+                'title': 'Selecione a cor para visualização no sistema'
+            }),
+            'ativo': forms.CheckboxInput(attrs={
+                'class': 'w-5 h-5 rounded border-stone-300 text-[#B4977A] focus:ring-[#B4977A]'
+            }),
+        }

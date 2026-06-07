@@ -13,6 +13,7 @@ class Categoria(models.Model):
         verbose_name='Categoria Pai'
     )
 
+
     class Meta:
         verbose_name = 'Categoria'
         verbose_name_plural = 'Categorias'
@@ -37,6 +38,7 @@ class Categoria(models.Model):
 
 class Status(models.Model):
     descricao = models.CharField(max_length=50, blank=False, null=False, unique=True, verbose_name='Descrição')
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
     class Meta():
         verbose_name = 'Status'
@@ -46,10 +48,17 @@ class Status(models.Model):
     def __str__(self):
         return self.descricao
 
+    def save(self, *args, **kwargs):
+        # Normalização de dados antes de salvar no banco
+        if self.descricao: self.descricao = self.descricao.upper()
+        super(Status, self).save(*args, **kwargs)
+
+
 
 class Conservacao(models.Model):
     descricao = models.CharField(max_length=50, blank=False, null=False, unique=True, verbose_name='Descrição')
-    
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
+
     class Meta():
         verbose_name = 'Conservação'
         verbose_name_plural = 'Conservações'
@@ -58,9 +67,15 @@ class Conservacao(models.Model):
     def __str__(self):
         return self.descricao
     
+    def save(self, *args, **kwargs):
+        # Normalização de dados antes de salvar no banco
+        if self.descricao: self.descricao = self.descricao.upper()
+        super(Conservacao, self).save(*args, **kwargs)
+    
 
 class Cor(models.Model):
     descricao = models.CharField(max_length=40, unique=True, verbose_name="Nome da Cor")
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
     
     codigo_hex = models.CharField(
         max_length=7, null=True, blank=True,
@@ -75,6 +90,12 @@ class Cor(models.Model):
 
     def __str__(self):
         return self.descricao
+
+    def save(self, *args, **kwargs):
+        # Normalização de dados antes de salvar no banco
+        if self.descricao: self.descricao = self.descricao.upper()
+        super(Cor, self).save(*args, **kwargs)
+
 
 class Produto(models.Model):
     GENERO_CHOICES = [
@@ -101,11 +122,13 @@ class Produto(models.Model):
     status = models.ForeignKey(Status, on_delete=models.PROTECT, verbose_name="Status")
     conservacao = models.ForeignKey(Conservacao, on_delete=models.PROTECT, verbose_name="Conservação")
     total_locacoes = models.PositiveIntegerField(default=0, verbose_name="Número de Locações Realizadas")
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
     # 4. Precificação e Valores Financeiros
     preco_aluguel_padrao = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Preço do Aluguel")
     preco_custo = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Preço de Custo de Compra")
     multa_atraso_diaria = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Multa por Dia de Atraso", help_text="Valor cobrado por cada dia de atraso na devolução")
+
 
     # Metadados e representação
     class Meta:
