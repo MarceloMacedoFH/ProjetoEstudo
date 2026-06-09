@@ -12,6 +12,14 @@
         </div>
         
         <div class="flex flex-col md:flex-row items-center gap-4">
+            <form method="GET" action="{% url 'lista_clientes' %}" class="relative group">
+                <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Buscar por nome ou CPF..." 
+                    class="pl-11 pr-4 py-3 bg-white border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#B4977A]/20 focus:border-[#B4977A] transition-all w-full md:w-64 lg:w-80 shadow-sm">
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-[#B4977A] transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </form>
+            
             <a href="{% url 'criar_status' %}" class="inline-flex items-center px-6 py-3 bg-[#B4977A] text-white font-semibold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20 group shrink-0">
                 <svg class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
@@ -28,7 +36,7 @@
                 <tr class="text-[12px] uppercase tracking-[0.2em] text-stone-600 font-bold">
                     <th class="px-8 pb-2">Descricao</th>
                     <th class="px-8 pb-2">Ativo</th>
-                    <th class="px-8 py-5 text-right">Ações</th>
+                    <th class="px-6 py-5 text-right">Ações</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-stone-50">
@@ -36,7 +44,7 @@
                 <tr class="hover:bg-white/60 transition-colors group">
                     <td class="px-6 py-5">
                         <div class="flex items-center">
-                            <div class="font-semibold text-stone-800">
+                            <div class="brand-font text-xl text-stone-700 uppercase">
                                 {{ stat.descricao }}
                             </div>
                         </div>
