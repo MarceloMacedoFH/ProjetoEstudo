@@ -67,7 +67,10 @@
 
             <!-- Ações -->
             <div class="flex items-center justify-end gap-4 pt-6 border-t border-stone-100">
-                <a href="{% url 'lista_status' %}" class="text-stone-400 hover:text-stone-600 font-medium transition-colors">Cancelar</a>
+                <div class="flex-1">
+                    <a href="{% url 'excluir_status' form.instance.pk %}" class="text-[11px] uppercase tracking-widest text-red-500 hover:text-red-700 font-bold transition-colors">Excluir Status</a>
+                </div>
+                <a href="{% url 'lista_status' %}" class="text-stone-400 hover:text-stone-600 font-medium transition-colors">Voltar</a>
                 <button type="submit" class="px-10 py-4 bg-[#B4977A] text-white font-bold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20">
                     Salvar Cadastro
                 </button>

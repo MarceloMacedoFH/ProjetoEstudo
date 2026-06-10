@@ -132,6 +132,15 @@ def editar_status(request, pk):
 
     return render(request, 'estoque/status/editar_status.html', context)
 
+def excluir_status(request, pk):
+    status = get_object_or_404(Status, pk=pk)
+
+    if request.method == 'POST':
+        status.delete()
+        return redirect('lista_status')
+
+    return render(request, 'estoque/status/confirmar_exclusao.html', {'status': status})
+
 
 
     
