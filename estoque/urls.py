@@ -1,5 +1,10 @@
 from django.urls import path
-from .views import lista_estoque, lista_categoria, criar_categoria, editar_categoria, excluir_categoria,lista_status, criar_status,editar_status,excluir_status
+from .views import (
+    criar_conservacao, lista_estoque, lista_categoria, criar_categoria, 
+    editar_categoria, excluir_categoria, lista_status, criar_status, 
+    editar_status, excluir_status, lista_conservacao, lista_cor,
+    criar_cor, editar_cor, excluir_cor
+)
 
 
 
@@ -20,5 +25,13 @@ urlpatterns = [
     path('status/editar/<int:pk>/', editar_status, name='editar_status'),
     path('status/excluir/<int:pk>/', excluir_status, name='excluir_status'),
 
-    
+    #Conservação
+    path('conservacao/', lista_conservacao, name='lista_conservacao'),
+    path('conservacao/criar/', criar_conservacao, name='criar_conservacao'),
+
+    #Cor
+    path('cor/', lista_cor, name='lista_cor'),
+    path('cor/criar/', criar_cor, name='criar_cor'),
+    path('cor/editar/<int:pk>/', editar_cor, name='editar_cor'),
+    path('cor/excluir/<int:pk>/', excluir_cor, name='excluir_cor'),
 ]

@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import F
 from django.db.models.functions import Coalesce
-from .models import Categoria, Status
-from .forms import CategoriaForm, StatusForm
+from .models import Categoria, Status, Conservacao, Cor
+from .forms import CategoriaForm, StatusForm, ConservacaoForm, CorForm
 
 
 def home(request):
@@ -132,6 +132,7 @@ def editar_status(request, pk):
 
     return render(request, 'estoque/status/editar_status.html', context)
 
+
 def excluir_status(request, pk):
     status = get_object_or_404(Status, pk=pk)
 
@@ -142,5 +143,70 @@ def excluir_status(request, pk):
     return render(request, 'estoque/status/confirmar_exclusao.html', {'status': status})
 
 
+#Conservação 
+def lista_conservacao(request):
+    conservacao = Conservacao.objects.all()
 
+    context = {
+        'conservacao': conservacao,
+    }
+
+    return render(request, 'estoque/conservacao/lista_conservacao.html', context)
+
+def criar_conservacao(request):
+    if request.method == 'POST':
+        form = ConservacaoForm(request.POST)
+        if form.is_valid():
+            form.save()
+        return redirect('lista_conservacao')
     
+    form = ConservacaoForm()
+
+    context = {
+        'form': form,
+    }
+
+    return render(request, 'estoque/conservacao/criar_conservacao.html', context)
+
+
+#Cor
+def lista_cor(request):
+    cores = Cor.objects.all().order_by('descricao')
+
+    context = {
+        'cores': cores,
+    }
+    return render(request, 'estoque/cor/lista_cor.html', context)
+
+def criar_cor(request):
+    if request.method == 'POST':
+        form = CorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_cor')
+    else:
+        form = CorForm()
+    return render(request, 'estoque/cor/criar_cor.html', {'form': form})
+
+def editar_cor(request, pk):
+    cor = get_object_or_404(Cor, pk=pk)
+    if request.method == 'POST':
+        form = CorForm(request.POST, instance=cor)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_cor')
+    else:
+        form = CorForm(instance=cor)
+    
+    context = {
+        'form': form,
+        'is_edit': True,
+    }
+    return render(request, 'estoque/cor/editar_cor.html', context)
+
+def excluir_cor(request, pk):
+    cor = get_object_or_404(Cor, pk=pk)
+    if request.method == 'POST':
+        cor.delete()
+        return redirect('lista_cor')
+    return render(request, 'estoque/cor/confirmar_exclusao.html', {'cor': cor})

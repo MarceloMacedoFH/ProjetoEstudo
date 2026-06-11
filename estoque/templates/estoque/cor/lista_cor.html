@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}cor - Center Noivas{% endblock %}
+
+{% block content %}
+<div class="premium-card p-10">
+    <!-- Cabeçalho da Listagem -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
+        <div>
+            <h1 class="brand-font text-4xl text-stone-800 mb-2">Gestão Cores</h1>
+            <p class="text-stone-600 font-normal tracking-wide italic">Visualize e gerencie o cadastro das suas cores</p>
+        </div>
+        
+        <div class="flex flex-col md:flex-row items-center gap-4">
+            <form method="GET" action="#" class="relative group">
+                <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Buscar por descricao" 
+                    class="pl-11 pr-4 py-3 bg-white border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#B4977A]/20 focus:border-[#B4977A] transition-all w-full md:w-64 lg:w-80 shadow-sm">
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-[#B4977A] transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </form>
+            
+            <a href="{% url 'criar_cor' %}" class="inline-flex items-center px-6 py-3 bg-[#B4977A] text-white font-semibold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20 group shrink-0">
+                <svg class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Nova Cor
+            </a>
+        </div>
+    </div>
+
+    <!-- Container da Tabela Elegante -->
+    <div class="overflow-hidden rounded-[2rem] border border-stone-100 bg-white/40 backdrop-blur-sm">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="text-[12px] uppercase tracking-[0.2em] text-stone-600 font-bold">
+                    <th class="px-6 pb-2">Descricao</th>
+                    <th class="px-9 pb-2 text-center">Demonstração</th>
+                    <th class="px-5 pb-2 text-center">Ativo</th>
+                    <th class="px-6 py-5 text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-50">
+                {% for x in cores %}
+                <tr class="hover:bg-white/60 transition-colors group">
+                    <td class="px-8 py-5">
+                        <div class="flex items-center">
+                            <div class="brand-font text-xl text-stone-700 uppercase flex items-center justify-center">
+                                {{ x.descricao }}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-10 py-5">
+                        <div class="flex items-center justify-center">
+                            {% if x.codigo_hex and x.codigo_hex|length > 2 %}
+                                <div class="w-12 h-7 rounded-lg border border-stone-200 shadow-sm bg-[{{ x.codigo_hex }}]" title="{{ x.codigo_hex }}"></div>
+                            {% else %}
+                                <span class="text-stone-300 italic text-[10px] uppercase tracking-widest">Indefinida</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="px-4 py-5 text-center">
+                        {% if x.ativo %}
+                        <span class="inline-flex items-center text-emerald-600 text-[10px] uppercase tracking-widest font-bold">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse"></span>
+                            Ativo
+                        </span>
+                        {% else %}
+                        <span class="inline-flex items-center text-stone-400 text-[10px] uppercase tracking-widest font-bold">
+                            <span class="w-2 h-2 rounded-full bg-stone-300 mr-2"></span>
+                            Inativo
+                        </span>
+                        {% endif %}
+                    </td> 
+                    <td class="px-6 py-5 text-center">
+                        <div class="flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="{% url 'editar_cor' x.pk %}" class="p-2 text-stone-400 hover:text-[#B4977A] transition-colors" title="Editar">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="px-6 py-20 text-center">
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-10 h-10 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                            </div>
+                            <h3 class="text-stone-500 font-medium">Nenhuma cor encontrada</h3>
+                            <p class="text-stone-400 text-sm italic mt-1">Clique em "Nova Cor" para adicionar o cadastro.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

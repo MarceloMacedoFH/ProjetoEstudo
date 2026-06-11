@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Nova Conservação - Center Noivas{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="premium-card p-10">
+        <div class="mb-10 text-center">
+            {% if form.errors or messages %}
+            <div class="mb-8 text-left">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-4 rounded-2xl border {% if message.tags == 'error' %}bg-rose-50 border-rose-100 text-rose-700{% else %}bg-emerald-50 border-emerald-100 text-emerald-700{% endif %} shadow-sm">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if form.errors %}
+                    <div class="p-6 bg-rose-50 border border-rose-100 rounded-2xl shadow-sm">
+                        <div class="flex items-center gap-3 mb-4 text-rose-800">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <h3 class="font-bold uppercase tracking-widest text-[15px]">Por favor, corrija os erros abaixo:</h3>
+                        </div>
+                        <ul class="space-y-1">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li class="text-sm text-rose-600 flex items-start gap-2">
+                                        <span class="font-semibold whitespace-nowrap">{{ field.label }}:</span>
+                                        <span>{{ error }}</span>
+                                    </li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li class="text-sm text-rose-600">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            <h1 class="brand-font text-4xl text-stone-800 mb-2">Nova Conservação</h1>
+            <p class="text-stone-600 italic">Insira as informações abaixo</p>
+        </div>
+
+        <form method="POST" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- Seção: Pessoal -->
+            <div>
+                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-6 border-b border-stone-100 pb-2">Dados da Conservação</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Descricao</label>
+                        {{ form.descricao }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Observações e Ativo -->
+            <div class="space-y-4">
+                <div class="flex items-center gap-3 p-4 bg-stone-50 rounded-xl">
+                    <div>{{ form.ativo }}</div>
+                    <span class="text-sm text-stone-700 font-medium">Conservação ativa no sistema</span>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="flex items-center justify-end gap-4 pt-6 border-t border-stone-100">
+                <a href="{% url 'lista_conservacao' %}" class="text-stone-400 hover:text-stone-600 font-medium transition-colors">Cancelar</a>
+                <button type="submit" class="px-10 py-4 bg-[#B4977A] text-white font-bold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20">
+                    Salvar Cadastro
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
