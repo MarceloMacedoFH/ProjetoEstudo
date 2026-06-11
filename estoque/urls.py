@@ -3,7 +3,8 @@ from .views import (
     criar_conservacao, lista_estoque, lista_categoria, criar_categoria, 
     editar_categoria, excluir_categoria, lista_status, criar_status, 
     editar_status, excluir_status, lista_conservacao, lista_cor,
-    criar_cor, editar_cor, excluir_cor
+    criar_cor, editar_cor, excluir_cor, editar_conservacao,
+    excluir_conservacao
 )
 
 
@@ -28,6 +29,8 @@ urlpatterns = [
     #Conservação
     path('conservacao/', lista_conservacao, name='lista_conservacao'),
     path('conservacao/criar/', criar_conservacao, name='criar_conservacao'),
+    path('conservacao/editar/<int:pk>/', editar_conservacao, name='editar_conservacao'),
+    path('conservacao/excluir/<int:pk>/', excluir_conservacao, name='excluir_conservacao'),
 
     #Cor
     path('cor/', lista_cor, name='lista_cor'),

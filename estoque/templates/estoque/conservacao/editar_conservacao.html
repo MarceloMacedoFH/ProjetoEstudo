@@ -39,8 +39,8 @@
                 {% endif %}
             </div>
             {% endif %}
-            <h1 class="brand-font text-4xl text-stone-800 mb-2">Editar Status</h1>
-            <p class="text-stone-600 italic">Insira as informações do status abaixo</p>
+            <h1 class="brand-font text-4xl text-stone-800 mb-2">Editar Conservação</h1>
+            <p class="text-stone-600 italic">Altere as informações abaixo</p>
         </div>
 
         <form method="POST" class="space-y-8">
@@ -48,7 +48,7 @@
 
             <!-- Seção: Pessoal -->
             <div>
-                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-6 border-b border-stone-100 pb-2">Posição do Status</h2>
+                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-6 border-b border-stone-100 pb-2">Dados da Conservação</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="md:col-span-2">
                         <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Descricao</label>
@@ -61,16 +61,16 @@
             <div class="space-y-4">
                 <div class="flex items-center gap-3 p-4 bg-stone-50 rounded-xl">
                     <div>{{ form.ativo }}</div>
-                    <span class="text-sm text-stone-700 font-medium">Status ativo no sistema</span>
+                    <span class="text-sm text-stone-700 font-medium">Conservação ativa no sistema</span>
                 </div>
             </div>
 
             <!-- Ações -->
             <div class="flex items-center justify-end gap-4 pt-6 border-t border-stone-100">
                 <div class="flex-1">
-                    <a href="{% url 'excluir_status' form.instance.pk %}" class="text-[11px] uppercase tracking-widest text-red-500 hover:text-red-700 font-bold transition-colors">Excluir Status</a>
+                    <a href="{% url 'excluir_conservacao' form.instance.pk %}" class="text-[11px] uppercase tracking-widest text-red-500 hover:text-red-700 font-bold transition-colors">Excluir Conservação</a>
                 </div>
-                <a href="{% url 'lista_status' %}" class="text-stone-400 hover:text-stone-600 font-medium transition-colors">Voltar</a>
+                <a href="{% url 'lista_conservacao' %}" class="text-stone-400 hover:text-stone-600 font-medium transition-colors">Voltar</a>
                 <button type="submit" class="px-10 py-4 bg-[#B4977A] text-white font-bold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20">
                     Salvar Cadastro
                 </button>

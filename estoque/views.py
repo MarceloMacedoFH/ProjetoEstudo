@@ -158,15 +158,34 @@ def criar_conservacao(request):
         form = ConservacaoForm(request.POST)
         if form.is_valid():
             form.save()
-        return redirect('lista_conservacao')
+            return redirect('lista_conservacao')
     
     form = ConservacaoForm()
+    return render(request, 'estoque/conservacao/criar_conservacao.html', {'form': form})
 
+def editar_conservacao(request, pk):
+    conservacao = get_object_or_404(Conservacao, pk=pk)
+    if request.method == 'POST':
+        form = ConservacaoForm(request.POST, instance=conservacao)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_conservacao')
+    else:
+        form = ConservacaoForm(instance=conservacao)
+    
     context = {
         'form': form,
+        'is_edit': True,
     }
+    return render(request, 'estoque/conservacao/editar_conservacao.html', context)
 
-    return render(request, 'estoque/conservacao/criar_conservacao.html', context)
+def excluir_conservacao(request, pk):
+    conservacao = get_object_or_404(Conservacao, pk=pk)
+    if request.method == 'POST':
+        conservacao.delete()
+        return redirect('lista_conservacao')
+    
+    return render(request, 'estoque/conservacao/confirmar_exclusao.html', {'conservacao': conservacao})
 
 
 #Cor
