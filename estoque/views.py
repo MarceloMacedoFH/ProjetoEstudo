@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import F
+from django.db.models import F, Q
 from django.db.models.functions import Coalesce
 from .models import Categoria, Status, Conservacao, Cor
 from .forms import CategoriaForm, StatusForm, ConservacaoForm, CorForm
 
-
+#HOME
 def home(request):
     # Por enquanto retornamos valores fictícios até que as tabelas de 
     # agendamentos e locações sejam criadas no models.py
@@ -16,6 +16,7 @@ def home(request):
         'total_alugados': 0,
     }
     return render(request, 'home.html', context)
+
 
 
 #Metodos Categorias
@@ -34,7 +35,6 @@ def criar_categoria(request):
     
     return render(request, 'estoque/categoria/criar_categoria.html', context)
 
-
 def editar_categoria(request, pk):
     categoria = get_object_or_404(Categoria, pk=pk)
     if request.method == 'POST':
@@ -51,7 +51,6 @@ def editar_categoria(request, pk):
     }
     return render(request, 'estoque/categoria/editar_categoria.html', context)
 
-
 def excluir_categoria(request, pk):
     categoria = get_object_or_404(Categoria, pk=pk)
     if request.method == 'POST':
@@ -59,12 +58,8 @@ def excluir_categoria(request, pk):
         return redirect('lista_categorias')
     return render(request, 'estoque/categoria/confirmar_exclusao.html', {'categoria': categoria})
 
-
 def lista_categoria(request):
-    # Ordenação Hierárquica:
-    # 1. Agrupamos as categorias pelo ID do pai (ou pelo próprio ID se for pai).
-    # 2. Dentro do grupo, garantimos que o Pai (null) venha antes dos filhos.
-    # 3. Ordenamos alfabeticamente entre irmãos.
+    query = request.GET.get('q')
     categorias = Categoria.objects.annotate(
         sort_group=Coalesce('categoria_pai_id', 'id')
     ).order_by(
@@ -73,11 +68,19 @@ def lista_categoria(request):
         'descricao'
     ).select_related('categoria_pai')
 
-    context = {
-        'categorias': categorias
-    }
+    if query:
+        categorias = categorias.filter(
+            Q(descricao__icontains=query) | 
+            Q(categoria_pai__descricao__icontains=query) | 
+            Q(subcategorias__descricao__icontains=query)
+        ).distinct()
 
+    context = {
+        'categorias': categorias,
+        'query': query,
+    }
     return render(request, 'estoque/categoria/lista_categoria.html', context)
+
 
 
 #Metodos Produtos 
@@ -89,15 +92,19 @@ def lista_estoque(request):
 
 #Metodos Status
 def lista_status(request):
+    query = request.GET.get('q')
     status = Status.objects.all()
     
+    if query:
+        status = status.filter(descricao__icontains=query)
+    
     context = {
-        'status': status
+        'status': status,
+        'query': query,
     }
 
     return render(request, 'estoque/status/lista_status.html', context)
     
-
 def criar_status(request):
 
     if request.method == 'POST':
@@ -113,7 +120,6 @@ def criar_status(request):
     }   
     
     return render(request, 'estoque/status/criar_status.html', context)
-
 
 def editar_status(request, pk):
     status = get_object_or_404(Status, pk=pk)
@@ -132,7 +138,6 @@ def editar_status(request, pk):
 
     return render(request, 'estoque/status/editar_status.html', context)
 
-
 def excluir_status(request, pk):
     status = get_object_or_404(Status, pk=pk)
 
@@ -143,12 +148,18 @@ def excluir_status(request, pk):
     return render(request, 'estoque/status/confirmar_exclusao.html', {'status': status})
 
 
+
 #Conservação 
 def lista_conservacao(request):
+    query = request.GET.get('q')
     conservacao = Conservacao.objects.all()
+
+    if query:
+        conservacao = conservacao.filter(descricao__icontains=query)
 
     context = {
         'conservacao': conservacao,
+        'query': query,
     }
 
     return render(request, 'estoque/conservacao/lista_conservacao.html', context)
@@ -188,12 +199,18 @@ def excluir_conservacao(request, pk):
     return render(request, 'estoque/conservacao/confirmar_exclusao.html', {'conservacao': conservacao})
 
 
+
 #Cor
 def lista_cor(request):
+    query = request.GET.get('q')
     cores = Cor.objects.all().order_by('descricao')
+
+    if query:
+        cores = cores.filter(descricao__icontains=query)
 
     context = {
         'cores': cores,
+        'query': query,
     }
     return render(request, 'estoque/cor/lista_cor.html', context)
 

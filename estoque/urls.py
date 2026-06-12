@@ -9,7 +9,6 @@ from .views import (
 
 
 
-
 urlpatterns = [
     #Estoque 
     path('estoque/', lista_estoque, name='lista_estoque'),

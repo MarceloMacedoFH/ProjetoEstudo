@@ -12,7 +12,7 @@
         </div>
         
         <div class="flex flex-col md:flex-row items-center gap-4">
-            <form method="GET" action="#" class="relative group">
+            <form method="GET" action="{% url 'lista_conservacao' %}" class="relative group">
                 <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Buscar por descricao" 
                     class="pl-11 pr-4 py-3 bg-white border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#B4977A]/20 focus:border-[#B4977A] transition-all w-full md:w-64 lg:w-80 shadow-sm">
                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-[#B4977A] transition-colors">

@@ -12,8 +12,8 @@
         </div>
         
         <div class="flex flex-col md:flex-row items-center gap-4">
-            <form method="GET" action="{% url 'lista_clientes' %}" class="relative group">
-                <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Buscar por nome ou CPF..." 
+            <form method="GET" action="{% url 'lista_status' %}" class="relative group">
+                <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Buscar pela descricao" 
                     class="pl-11 pr-4 py-3 bg-white border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#B4977A]/20 focus:border-[#B4977A] transition-all w-full md:w-64 lg:w-80 shadow-sm">
                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-[#B4977A] transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
