@@ -4,62 +4,120 @@
 
 {% block content %}
 <div class="premium-card p-10">
-    <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-        <div class="flex-1">
+    <!-- Cabeçalho da Listagem -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
+        <div>
             <h1 class="brand-font text-4xl text-stone-800 mb-2">Gestão de Produtos</h1>
-            <p class="text-stone-600 font-normal tracking-wide italic">Controle de vestidos, acessórios e trajes finos</p>
+            <p class="text-stone-600 font-normal tracking-wide italic">Visualize e gerencie o catálogo de vestidos e acessórios</p>
         </div>
         
-        <div class="flex items-center gap-4">
-            <!-- Barra de busca minimalista -->
-            <div class="relative">
-                <input type="text" placeholder="Buscar peça..." class="form-control pl-10 pr-4 py-2 bg-stone-50 border-stone-200/50 focus:bg-white text-stone-700 min-w-[300px]">
-                <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-            </div>
-            <a href="#" class="px-8 py-3 bg-[#B4977A] text-white rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-[#8C7356] transition-all shadow-lg shadow-[#B4977A]/20">
-                Novo Item
+        <div class="flex flex-col md:flex-row items-center gap-4">
+            <form method="GET" action="{% url 'lista_produto' %}" class="relative group">
+                <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Buscar por descrição ou código..." 
+                    class="pl-11 pr-4 py-3 bg-white border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#B4977A]/20 focus:border-[#B4977A] transition-all w-full md:w-64 lg:w-80 shadow-sm">
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-[#B4977A] transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </form>
+
+            <a href="{% url 'criar_produto' %}" class="inline-flex items-center px-6 py-3 bg-[#B4977A] text-white font-semibold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20 group shrink-0">
+                <svg class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Novo Produto
             </a>
         </div>
     </div>
 
-    <!-- Placeholder para listagem de produtos -->
-    <div class="overflow-x-auto">
-        <table class="w-full text-left border-separate border-spacing-y-4">
+    <!-- Container da Tabela Elegante -->
+    <div class="overflow-hidden rounded-[2rem] border border-stone-100 bg-white/40 backdrop-blur-sm">
+        <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="text-[12px] uppercase tracking-[0.2em] text-stone-600 font-bold">
-                    <th class="px-8 pb-2">Ref/Código</th>
-                    <th class="px-8 pb-2">Descrição da Peça</th>
-                    <th class="px-8 pb-2">Categoria</th>
-                    <th class="px-8 pb-2">Status</th>
-                    <th class="px-8 pb-2">Valor Aluguel</th>
-                    <th class="px-8 pb-2 text-right">Ações</th>
+                    <th class="px-6 py-5">Ref/Código</th>
+                    <th class="px-6 py-5">Descrição</th>
+                    <th class="px-6 py-5">Categoria</th>
+                    <th class="px-6 py-5">Aluguel (R$)</th>
+                    <th class="px-6 py-5">Status</th>
+                    <th class="px-6 py-5 text-right">Ações</th>
                 </tr>
             </thead>
-            <tbody>
-                <!-- Exemplo de linha de produto -->
-                <tr class="group cursor-pointer">
-                    <td class="px-8 py-6 bg-white/40 rounded-l-[2rem] border-y border-l border-stone-100/50 group-hover:bg-white transition-all duration-300">
-                        <span class="font-mono text-xs text-[#B4977A] font-bold">#VEST-001</span>
+            <tbody class="divide-y divide-stone-50">
+                {% for produto in produtos %}
+                <tr class="hover:bg-white/60 transition-colors group">
+                    <td class="px-6 py-5">
+                        <span class="font-mono text-xs text-[#B4977A] font-bold">#{{ produto.codigo }}</span>
                     </td>
-                    <td class="px-8 py-6 bg-white/40 border-y border-stone-100/50 group-hover:bg-white transition-all duration-300">
-                        <div class="font-medium text-stone-800">Vestido de Noiva Sereia Renda Francesa</div>
-                        <div class="text-[11px] text-stone-500 uppercase font-semibold mt-1">Tamanho: 38 | Cor: Off-White</div>
+                    <td class="px-6 py-5">
+                        <div class="flex flex-col">
+                            <span class="font-semibold text-stone-800">{{ produto.descricao }}</span>
+                            <span class="text-[10px] text-stone-500 uppercase tracking-tight mt-1">
+                                Tam: {{ produto.tamanho_etiqueta }} | Cor: {{ produto.cor_principal.descricao }}
+                            </span>
+                        </div>
                     </td>
-                    <td class="px-8 py-6 bg-white/40 border-y border-stone-100/50 group-hover:bg-white transition-all duration-300">
-                        <span class="text-xs text-stone-600 italic">Noivas -> Vestidos</span>
+                    <td class="px-6 py-5 text-sm text-stone-600 italic">
+                        {{ produto.categoria.descricao }}
                     </td>
-                    <td class="px-8 py-6 bg-white/40 border-y border-stone-100/50 group-hover:bg-white transition-all duration-300">
-                        <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-[10px] font-bold uppercase rounded-full border border-emerald-100">Disponível</span>
+                    <td class="px-6 py-5 text-sm font-semibold text-stone-700">
+                        {{ produto.preco_aluguel_padrao|floatformat:2 }}
                     </td>
-                    <td class="px-8 py-6 bg-white/40 border-y border-stone-100/50 group-hover:bg-white transition-all duration-300">
-                        <span class="font-bold text-stone-800 font-mono">R$ 2.500,00</span>
+                    <td class="px-6 py-5">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-stone-100 text-[#B4977A] text-[10px] font-bold uppercase">
+                            {{ produto.status.descricao }}
+                        </span>
                     </td>
-                    <td class="px-8 py-6 bg-white/40 rounded-r-[2rem] border-y border-r border-stone-100/50 group-hover:bg-white transition-all duration-300 text-right">
-                        <button class="p-2 hover:bg-stone-50 rounded-full transition-colors text-stone-400 hover:text-stone-600"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg></button>
+                    <td class="px-6 py-5 text-right">
+                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="{% url 'editar_produto' produto.id %}" class="p-2 text-stone-400 hover:text-[#B4977A] transition-colors" title="Editar">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </a>
+                            <a href="{% url 'excluir_produto' produto.id %}" class="p-2 text-stone-400 hover:text-red-500 transition-colors" title="Excluir">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </a>
+                        </div>
                     </td>
                 </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-20 text-center">
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-10 h-10 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                            </div>
+                            <h3 class="text-stone-500 font-medium">Nenhum produto encontrado</h3>
+                            <p class="text-stone-400 text-sm italic mt-1">Clique em "Novo Produto" para começar seu catálogo.</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
+
+    <!-- Paginação -->
+    {% if produtos.has_other_pages %}
+    <div class="mt-8 flex items-center justify-center gap-2">
+        {% if produtos.has_previous %}
+            <a href="?page={{ produtos.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" class="p-2 text-stone-400 hover:text-[#B4977A] transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </a>
+        {% endif %}
+
+        {% for num in produtos.paginator.page_range %}
+            {% if produtos.number == num %}
+                <span class="w-10 h-10 flex items-center justify-center rounded-full bg-[#B4977A] text-white text-sm font-bold shadow-md">{{ num }}</span>
+            {% elif num > produtos.number|add:'-3' and num < produtos.number|add:'3' %}
+                <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}" class="w-10 h-10 flex items-center justify-center rounded-full text-stone-600 hover:bg-stone-100 transition-colors text-sm font-medium">{{ num }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if produtos.has_next %}
+            <a href="?page={{ produtos.next_page_number }}{% if query %}&q={{ query }}{% endif %}" class="p-2 text-stone-400 hover:text-[#B4977A] transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Categoria, Status, Conservacao, Cor
+from .models import Categoria, Status, Conservacao, Cor, Produto
 
 class CategoriaForm(forms.ModelForm):
     class Meta:
@@ -50,6 +50,35 @@ class StatusForm(forms.ModelForm):
                 'class': 'form-control', 
                 'placeholder': 'Ex: Disponível, Alugado, Lavanderia...'
             }),
+            'ativo': forms.CheckboxInput(attrs={
+                'class': 'w-5 h-5 rounded border-stone-300 text-[#B4977A] focus:ring-[#B4977A]'
+            }),
+        }
+
+class ProdutoForm(forms.ModelForm):
+    class Meta:
+        model = Produto
+        fields = [
+            'descricao', 'codigo', 'codigo_barras', 'categoria', 
+            'cor_principal', 'tamanho_etiqueta', 'genero', 'marca_estilista', 
+            'status', 'conservacao', 'preco_aluguel_padrao', 'preco_custo', 
+            'multa_atraso_diaria', 'observacao', 'ativo'
+        ]
+        widgets = {
+            'descricao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Vestido Sereia Renda'}),
+            'codigo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'REF-001'}),
+            'codigo_barras': forms.TextInput(attrs={'class': 'form-control'}),
+            'categoria': forms.Select(attrs={'class': 'form-control'}),
+            'cor_principal': forms.Select(attrs={'class': 'form-control'}),
+            'tamanho_etiqueta': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: 38, P, M...'}),
+            'genero': forms.Select(attrs={'class': 'form-control'}),
+            'marca_estilista': forms.TextInput(attrs={'class': 'form-control'}),
+            'status': forms.Select(attrs={'class': 'form-control'}),
+            'conservacao': forms.Select(attrs={'class': 'form-control'}),
+            'preco_aluguel_padrao': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'preco_custo': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'multa_atraso_diaria': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'observacao': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'ativo': forms.CheckboxInput(attrs={
                 'class': 'w-5 h-5 rounded border-stone-300 text-[#B4977A] focus:ring-[#B4977A]'
             }),

@@ -1,8 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import F, Q
 from django.db.models.functions import Coalesce
-from .models import Categoria, Status, Conservacao, Cor
-from .forms import CategoriaForm, StatusForm, ConservacaoForm, CorForm
+from .models import Categoria, Status, Conservacao, Cor, Produto
+from .forms import CategoriaForm, StatusForm, ConservacaoForm, CorForm, ProdutoForm
 
 #HOME
 def home(request):
@@ -84,9 +84,60 @@ def lista_categoria(request):
 
 
 #Metodos Produtos 
-def lista_estoque(request):
+def lista_produto(request):
+    query = request.GET.get('q')
+    produtos = Produto.objects.all().select_related(
+        'categoria', 'status', 'cor_principal', 'conservacao'
+    )
 
-    return render(request, 'estoque/produto/lista_produto.html')
+    if query:
+        produtos = produtos.filter(
+            Q(descricao__icontains=query) |
+            Q(codigo__icontains=query) |
+            Q(categoria__descricao__icontains=query)
+        ).distinct()
+
+    context = {
+        'produtos': produtos,
+        'query': query,
+    }
+    return render(request, 'estoque/produto/lista_produto.html', context)
+
+def criar_produto(request):
+    if request.method == 'POST':
+        form = ProdutoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_produto')
+    else:
+        form = ProdutoForm()
+    
+    return render(request, 'estoque/produto/criar_produto.html', {'form': form})
+
+def editar_produto(request, pk):
+    produto = get_object_or_404(Produto, pk=pk)
+    if request.method == 'POST':
+        form = ProdutoForm(request.POST, instance=produto)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_produto')
+    else:
+        form = ProdutoForm(instance=produto)
+    
+    context = {
+        'form': form,
+        'is_edit': True,
+        'produto': produto
+    }
+    return render(request, 'estoque/produto/editar_produto.html', context)
+
+def excluir_produto(request, pk):
+    produto = get_object_or_404(Produto, pk=pk)
+    if request.method == 'POST':
+        produto.delete()
+        return redirect('lista_produto')
+    
+    return render(request, 'estoque/produto/confirmar_exclusao.html', {'produto': produto})
 
 
 

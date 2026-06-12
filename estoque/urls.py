@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (
-    criar_conservacao, lista_estoque, lista_categoria, criar_categoria, 
+    criar_conservacao, lista_produto, criar_produto, editar_produto, 
+    excluir_produto, lista_categoria, criar_categoria, 
     editar_categoria, excluir_categoria, lista_status, criar_status, 
     editar_status, excluir_status, lista_conservacao, lista_cor,
     criar_cor, editar_cor, excluir_cor, editar_conservacao,
@@ -10,8 +11,11 @@ from .views import (
 
 
 urlpatterns = [
-    #Estoque 
-    path('estoque/', lista_estoque, name='lista_estoque'),
+    #produto 
+    path('produto/', lista_produto, name='lista_produto'),
+    path('produto/criar/', criar_produto, name='criar_produto'),
+    path('produto/editar/<int:pk>/', editar_produto, name='editar_produto'),
+    path('produto/excluir/<int:pk>/', excluir_produto, name='excluir_produto'),
 
     #Categorias
     path('categorias/', lista_categoria, name='lista_categorias'),
