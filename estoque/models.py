@@ -138,3 +138,14 @@ class Produto(models.Model):
 
     def __str__(self):
         return f"{self.codigo} - {self.descricao} (Tam: {self.tamanho_etiqueta})"
+    
+    def save(self, *args, **kwargs):
+        # Normalização de dados antes de salvar no banco
+        if self.descricao: self.descricao = self.descricao.upper()
+        if self.codigo: self.codigo = self.codigo.upper()
+        if self.codigo_barras: self.codigo_barras = self.codigo_barras.upper()
+        if self.observacao: self.observacao = self.observacao.upper()
+        if self.tamanho_etiqueta: self.tamanho_etiqueta = self.tamanho_etiqueta.upper()
+        if self.genero: self.genero = self.genero.upper()
+        if self.marca_estilista: self.marca_estilista = self.marca_estilista.upper()
+        super(Produto, self).save(*args, **kwargs)

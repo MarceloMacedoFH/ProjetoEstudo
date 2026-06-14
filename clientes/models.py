@@ -50,16 +50,11 @@ class Cliente(models.Model):
 
     def save(self, *args, **kwargs):
         # Normalização de dados antes de salvar no banco
-        if self.nome: self.nome = self.nome.upper()
-        if self.rg: self.rg = self.rg.upper()
-        if self.endereco: self.endereco = self.endereco.upper()
-        if self.numero: self.numero = self.numero.upper()
-        if self.complemento: self.complemento = self.complemento.upper()
-        if self.bairro: self.bairro = self.bairro.upper()
-        if self.municipio: self.municipio = self.municipio.upper()
-        if self.observacao: self.observacao = self.observacao.upper()
+        for field_name in ['nome', 'rg', 'endereco', 'numero', 'complemento', 'bairro', 'municipio', 'observacao']:
+            value = getattr(self, field_name)
+            if value:
+                setattr(self, field_name, value.upper())
         
         # Emails são padronizados em minúsculo por convenção técnica
         if self.email: self.email = self.email.lower()
-        
-        super(Cliente, self).save(*args, **kwargs)
+        super().save(*args, **kwargs)
