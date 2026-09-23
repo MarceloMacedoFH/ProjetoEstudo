@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import F, Q
+from django.db.models import F, Q, ProtectedError
 from django.db.models.functions import Coalesce
-from .models import Categoria, Status, Conservacao, Cor, Produto
-from .forms import CategoriaForm, StatusForm, ConservacaoForm, CorForm, ProdutoForm
+from django.contrib import messages
+from django.urls import reverse
+from .models import Categoria, Status, Conservacao, Cor, Produto, Tecido
+from .forms import CategoriaForm, StatusForm, ConservacaoForm, CorForm, ProdutoForm, TecidoForm
 
 #HOME
 def home(request):
@@ -24,8 +26,10 @@ def criar_categoria(request):
     if request.method == 'POST':
         form = CategoriaForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('lista_categorias')
+            categoria = form.save()
+            if categoria.categoria_pai:
+                return redirect(f'{reverse('lista_categorias')}?q={categoria.categoria_pai}')
+            return redirect(f'{reverse('lista_categorias')}?q={categoria.descricao}')   
     else:
         form = CategoriaForm()
     
@@ -40,8 +44,10 @@ def editar_categoria(request, pk):
     if request.method == 'POST':
         form = CategoriaForm(request.POST, instance=categoria)
         if form.is_valid():
-            form.save()
-            return redirect('lista_categorias')
+            categoria = form.save()
+            if categoria.categoria_pai:
+                return redirect(f'{reverse('lista_categorias')}?q={categoria.categoria_pai}')
+            return redirect(f'{reverse('lista_categorias')}?q={categoria.descricao}')
     else:
         form = CategoriaForm(instance=categoria)
     
@@ -107,8 +113,8 @@ def criar_produto(request):
     if request.method == 'POST':
         form = ProdutoForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('lista_produto')
+            produto = form.save()
+            return redirect(f'{reverse('lista_produto')}?q={produto.codigo}')
     else:
         form = ProdutoForm()
     
@@ -119,8 +125,8 @@ def editar_produto(request, pk):
     if request.method == 'POST':
         form = ProdutoForm(request.POST, instance=produto)
         if form.is_valid():
-            form.save()
-            return redirect('lista_produto')
+            produto = form.save()
+            return redirect(f'{reverse('lista_produto')}?q={produto.codigo}')
     else:
         form = ProdutoForm(instance=produto)
     
@@ -161,8 +167,8 @@ def criar_status(request):
     if request.method == 'POST':
         form = StatusForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('lista_status')
+            status = form.save()
+            return redirect(f'{reverse('lista_status')}?q={status.descricao}')
     else:
         form = StatusForm()
     
@@ -177,8 +183,8 @@ def editar_status(request, pk):
     if request.method == 'POST':
         form = StatusForm(request.POST, instance=status)
         if form.is_valid():
-            form.save()
-            return redirect('lista_status')
+            status = form.save()
+            return redirect(f'{reverse('lista_status')}?q={status.descricao}')
     else:
         form = StatusForm(instance=status)
     
@@ -219,9 +225,8 @@ def criar_conservacao(request):
     if request.method == 'POST':
         form = ConservacaoForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('lista_conservacao')
-    
+            conser = form.save()
+            return redirect(f'{reverse('lista_conservacao')}?q={conser.descricao}')  
     form = ConservacaoForm()
     return render(request, 'estoque/conservacao/criar_conservacao.html', {'form': form})
 
@@ -230,8 +235,8 @@ def editar_conservacao(request, pk):
     if request.method == 'POST':
         form = ConservacaoForm(request.POST, instance=conservacao)
         if form.is_valid():
-            form.save()
-            return redirect('lista_conservacao')
+            conser = form.save()
+            return redirect(f'{reverse('lista_conservacao')}?q={conser.descricao}')
     else:
         form = ConservacaoForm(instance=conservacao)
     
@@ -269,8 +274,8 @@ def criar_cor(request):
     if request.method == 'POST':
         form = CorForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('lista_cor')
+            cor = form.save()
+            return redirect(f'{reverse('lista_cor')}?q={cor.descricao}')
     else:
         form = CorForm()
     return render(request, 'estoque/cor/criar_cor.html', {'form': form})
@@ -280,8 +285,8 @@ def editar_cor(request, pk):
     if request.method == 'POST':
         form = CorForm(request.POST, instance=cor)
         if form.is_valid():
-            form.save()
-            return redirect('lista_cor')
+            cor = form.save()
+            return redirect(f'{reverse('lista_cor')}?q={cor.descricao}')
     else:
         form = CorForm(instance=cor)
     
@@ -297,3 +302,68 @@ def excluir_cor(request, pk):
         cor.delete()
         return redirect('lista_cor')
     return render(request, 'estoque/cor/confirmar_exclusao.html', {'cor': cor})
+
+
+#Metodos Tecido
+def lista_tecido(request):
+    query = request.GET.get('q')
+    tecidos = Tecido.objects.all().order_by('descricao')
+
+    if query:
+        tecidos = tecidos.filter(
+            Q(descricao__icontains=query) | 
+            Q(composicao__icontains=query)
+        ).distinct()
+
+    context = {
+        'tecidos': tecidos,
+        'query': query,
+    }
+    return render(request, 'estoque/tecido/lista_tecido.html', context)
+
+def criar_tecido(request):
+    if request.method == 'POST':
+        form = TecidoForm(request.POST)
+        if form.is_valid():
+            tecido = form.save()
+            return redirect(f'{reverse("lista_tecido")}?q={tecido.descricao}')
+    else:
+        form = TecidoForm()
+    
+    context = {
+        'form': form
+    }
+    return render(request, 'estoque/tecido/criar_tecido.html', context)
+
+def editar_tecido(request, pk):
+    tecido = get_object_or_404(Tecido, pk=pk)
+    if request.method == 'POST':
+        form = TecidoForm(request.POST, instance=tecido)
+        if form.is_valid():
+            tecido = form.save()
+            return redirect(f'{reverse("lista_tecido")}?q={tecido.descricao}')
+    else:
+        form = TecidoForm(instance=tecido)
+    
+    context = {
+        'form': form,
+        'is_edit': True,
+        'tecido': tecido
+    }
+    return render(request, 'estoque/tecido/editar_tecido.html', context)
+
+def excluir_tecido(request, pk):
+    tecido = get_object_or_404(Tecido, pk=pk)
+    if request.method == 'POST':
+        try:
+            tecido.delete()
+            return redirect('lista_tecido')
+        except ProtectedError:
+            # Aqui você pode adicionar uma mensagem de erro caso deseje usar o framework de messages do Django
+            return redirect('lista_tecido')
+
+    context = {
+        'tecido': tecido,
+        'objeto_nome': tecido.descricao
+    }
+    return render(request, 'estoque/tecido/confirmar_exclusao.html', context)

@@ -5,7 +5,8 @@ from .views import (
     editar_categoria, excluir_categoria, lista_status, criar_status, 
     editar_status, excluir_status, lista_conservacao, lista_cor,
     criar_cor, editar_cor, excluir_cor, editar_conservacao,
-    excluir_conservacao
+    excluir_conservacao, lista_tecido, criar_tecido, editar_tecido,
+    excluir_tecido
 )
 
 
@@ -40,4 +41,10 @@ urlpatterns = [
     path('cor/criar/', criar_cor, name='criar_cor'),
     path('cor/editar/<int:pk>/', editar_cor, name='editar_cor'),
     path('cor/excluir/<int:pk>/', excluir_cor, name='excluir_cor'),
+
+    #Tecido
+    path('tecido/', lista_tecido, name='lista_tecido'),
+    path('tecido/criar/', criar_tecido, name='criar_tecido'),
+    path('tecido/editar/<int:pk>/', editar_tecido, name='editar_tecido'),
+    path('tecido/excluir/<int:pk>/', excluir_tecido, name='excluir_tecido'),
 ]

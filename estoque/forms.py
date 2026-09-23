@@ -1,5 +1,5 @@
 from django import forms
-from .models import Categoria, Status, Conservacao, Cor, Produto
+from .models import Categoria, Status, Conservacao, Cor, Produto, Tecido
 
 class CategoriaForm(forms.ModelForm):
     class Meta:
@@ -55,12 +55,24 @@ class StatusForm(forms.ModelForm):
             }),
         }
 
+class TecidoForm(forms.ModelForm):
+    class Meta:
+        model = Tecido
+        fields = ['descricao', 'composicao', 'ativo']
+        widgets = {
+            'descricao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: GABARDINE ITALIANA'}),
+            'composicao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: 95% LÃ, 5% ELASTANO'}),
+            'ativo': forms.CheckboxInput(attrs={
+                'class': 'w-5 h-5 rounded border-stone-300 text-[#B4977A] focus:ring-[#B4977A]'
+            }),
+        }
+
 class ProdutoForm(forms.ModelForm):
     class Meta:
         model = Produto
         fields = [
-            'descricao', 'codigo', 'codigo_barras', 'categoria', 
-            'cor_principal', 'tamanho_etiqueta', 'genero', 'marca_estilista', 
+            'descricao', 'codigo', 'codigo_barras', 'categoria',
+            'cor_principal', 'tecido', 'tamanho_etiqueta', 'genero', 'marca_estilista', 
             'status', 'conservacao', 'preco_aluguel_padrao', 'preco_custo', 
             'multa_atraso_diaria', 'observacao', 'ativo'
         ]
@@ -70,6 +82,7 @@ class ProdutoForm(forms.ModelForm):
             'codigo_barras': forms.TextInput(attrs={'class': 'form-control'}),
             'categoria': forms.Select(attrs={'class': 'form-control'}),
             'cor_principal': forms.Select(attrs={'class': 'form-control'}),
+            'tecido': forms.Select(attrs={'class': 'form-control'}),
             'tamanho_etiqueta': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: 38, P, M...'}),
             'genero': forms.Select(attrs={'class': 'form-control'}),
             'marca_estilista': forms.TextInput(attrs={'class': 'form-control'}),

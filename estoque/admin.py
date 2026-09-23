@@ -1,10 +1,11 @@
 from django.contrib import admin
-from .models import Produto, Categoria, Conservacao, Status, Cor
+from .models import Produto, Categoria, Conservacao, Status, Cor, Tecido
 
 # Register your models here.
 admin.site.register(Conservacao)
 admin.site.register(Status)
 admin.site.register(Cor)
+admin.site.register(Tecido)
 
 @admin.register(Produto)
 class ProdutoAdmin(admin.ModelAdmin):

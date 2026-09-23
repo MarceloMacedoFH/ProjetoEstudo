@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Excluir Tecido - Center Noivas{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-20">
+    <div class="premium-card p-12 text-center border-t-4 border-rose-500 shadow-2xl shadow-rose-500/10">
+        <div class="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-8">
+            <svg class="w-10 h-10 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+        </div>
+
+        <h1 class="brand-font text-3xl text-stone-800 mb-4 uppercase">Confirmar Exclusão</h1>
+        
+        <div class="mb-10">
+            <p class="text-stone-500 font-light mb-2 italic text-lg">Você está prestes a remover o tecido:</p>
+            <p class="text-2xl font-bold text-stone-800 tracking-tight">{{ objeto_nome }}</p>
+            <p class="mt-4 px-6 py-3 bg-stone-50 rounded-xl text-xs text-stone-400 uppercase tracking-widest leading-relaxed">
+                Atenção: Esta ação não poderá ser desfeita se não houver vínculos ativos. Se houver produtos usando este tecido, a remoção será impedida pelo sistema.
+            </p>
+        </div>
+
+        <form method="POST" class="flex flex-col md:flex-row items-center justify-center gap-6">
+            {% csrf_token %}
+            <button type="submit" class="w-full md:w-auto px-12 py-4 bg-rose-500 text-white rounded-full text-[10px] uppercase tracking-widest font-bold hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20">
+                Sim, Excluir Registro
+            </button>
+            <a href="{% url 'lista_tecido' %}" class="text-stone-400 text-[10px] uppercase tracking-[0.2em] font-bold hover:text-stone-600 transition-colors">
+                Não, Cancelar Operação
+            </a>
+        </form>
+    </div>
+</div>
+{% endblock %}

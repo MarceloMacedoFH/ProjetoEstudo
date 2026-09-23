@@ -97,6 +97,30 @@ class Cor(models.Model):
         super(Cor, self).save(*args, **kwargs)
 
 
+class Tecido(models.Model):
+    descricao = models.CharField(max_length=100, unique=True, verbose_name="Nome do Tecido")
+    composicao = models.CharField(max_length=255, blank=True, null=True, verbose_name="Composição")
+    ativo = models.BooleanField(default=True, verbose_name='Ativo')
+
+    class Meta:
+        verbose_name = "Tecido"
+        verbose_name_plural = "Tecidos"
+        ordering = ['descricao']
+
+    def __str__(self):
+        if self.composicao:
+            return f"{self.descricao} ({self.composicao})"
+        return self.descricao
+
+    def save(self, *args, **kwargs):
+        # Normalização de dados
+        if self.descricao:
+            self.descricao = self.descricao.upper()
+        if self.composicao:
+            self.composicao = self.composicao.upper()
+        super(Tecido, self).save(*args, **kwargs)
+
+
 class Produto(models.Model):
     GENERO_CHOICES = [
         ('M', 'Masculino'),
@@ -114,6 +138,7 @@ class Produto(models.Model):
 
     # 2. Atributos Físicos e Variações
     cor_principal = models.ForeignKey(Cor, on_delete=models.PROTECT, verbose_name='Cor Principal')
+    tecido = models.ForeignKey(Tecido, on_delete=models.PROTECT, null=True, blank=True, verbose_name="Tecido Predominante")
     tamanho_etiqueta = models.CharField(max_length=10, verbose_name="Tamanho de Etiqueta")
     genero = models.CharField(max_length=1, choices=GENERO_CHOICES, verbose_name="Gênero")
     marca_estilista = models.CharField(max_length=100, blank=True, null=True, verbose_name="Marca ou Estilista")

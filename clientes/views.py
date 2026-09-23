@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from .models import Cliente
 from .forms import ClienteForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -29,8 +30,8 @@ def criar_cliente(request):
     if request.method == 'POST':
         form = ClienteForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('lista_clientes')
+            cliente = form.save()
+            return redirect(f"{reverse('lista_clientes')}?q={cliente.cpf}")
     else:
         form = ClienteForm()
     return render(request, 'clientes/criar_cliente.html', {'form': form})
@@ -40,8 +41,8 @@ def editar_cliente(request, pk):
     if request.method == 'POST':
         form = ClienteForm(request.POST, instance=cliente)
         if form.is_valid():
-            form.save()
-            return redirect('lista_clientes')
+            cliente = form.save()
+            return redirect(f"{reverse('lista_clientes')}?q={cliente.cpf}")
     else:
         form = ClienteForm(instance=cliente)
     return render(request, 'clientes/editar_cliente.html', {'form': form, 'cliente': cliente})
