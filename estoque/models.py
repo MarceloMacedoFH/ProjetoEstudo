@@ -99,7 +99,6 @@ class Cor(models.Model):
 
 class Tecido(models.Model):
     descricao = models.CharField(max_length=100, unique=True, verbose_name="Nome do Tecido")
-    composicao = models.CharField(max_length=255, blank=True, null=True, verbose_name="Composição")
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
     class Meta:
@@ -109,15 +108,13 @@ class Tecido(models.Model):
 
     def __str__(self):
         if self.composicao:
-            return f"{self.descricao} ({self.composicao})"
+            return f"{self.descricao}"
         return self.descricao
 
     def save(self, *args, **kwargs):
         # Normalização de dados
         if self.descricao:
             self.descricao = self.descricao.upper()
-        if self.composicao:
-            self.composicao = self.composicao.upper()
         super(Tecido, self).save(*args, **kwargs)
 
 

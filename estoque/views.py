@@ -1,3 +1,6 @@
+from urllib.parse import urlencode
+
+from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import F, Q, ProtectedError
 from django.db.models.functions import Coalesce
@@ -305,65 +308,82 @@ def excluir_cor(request, pk):
 
 
 #Metodos Tecido
+def _url_lista_tecido(query=None):
+    """Monta a URL da lista, já com a busca codificada (acentos, espaços, &, etc.)."""
+    url = reverse('lista_tecido')
+    if query:
+        url = f'{url}?{urlencode({"q": query})}'
+    return url
+ 
+ 
 def lista_tecido(request):
     query = request.GET.get('q')
     tecidos = Tecido.objects.all().order_by('descricao')
-
+ 
     if query:
-        tecidos = tecidos.filter(
-            Q(descricao__icontains=query) | 
-            Q(composicao__icontains=query)
-        ).distinct()
-
+        tecidos = tecidos.filter(descricao__icontains=query)
+ 
     context = {
         'tecidos': tecidos,
         'query': query,
     }
     return render(request, 'estoque/tecido/lista_tecido.html', context)
-
+ 
+ 
 def criar_tecido(request):
     if request.method == 'POST':
         form = TecidoForm(request.POST)
         if form.is_valid():
-            tecido = form.save()
-            return redirect(f'{reverse("lista_tecido")}?q={tecido.descricao}')
+            try:
+                tecido = form.save()
+            except IntegrityError:
+                # Rede de segurança: o form já barra duplicados, mas isso cobre
+                # o caso de dois cadastros simultâneos com o mesmo nome.
+                form.add_error('descricao', 'Já existe um tecido cadastrado com este nome.')
+            else:
+                return redirect(_url_lista_tecido(tecido.descricao))
     else:
         form = TecidoForm()
-    
+ 
     context = {
-        'form': form
+        'form': form,
     }
     return render(request, 'estoque/tecido/criar_tecido.html', context)
-
+ 
+ 
 def editar_tecido(request, pk):
     tecido = get_object_or_404(Tecido, pk=pk)
     if request.method == 'POST':
         form = TecidoForm(request.POST, instance=tecido)
         if form.is_valid():
             tecido = form.save()
-            return redirect(f'{reverse("lista_tecido")}?q={tecido.descricao}')
+            return redirect(_url_lista_tecido(tecido.descricao))
     else:
         form = TecidoForm(instance=tecido)
-    
+ 
     context = {
         'form': form,
-        'is_edit': True,
-        'tecido': tecido
+        'tecido': tecido,
     }
     return render(request, 'estoque/tecido/editar_tecido.html', context)
-
+ 
+ 
 def excluir_tecido(request, pk):
     tecido = get_object_or_404(Tecido, pk=pk)
     if request.method == 'POST':
         try:
             tecido.delete()
-            return redirect('lista_tecido')
         except ProtectedError:
-            # Aqui você pode adicionar uma mensagem de erro caso deseje usar o framework de messages do Django
-            return redirect('lista_tecido')
-
+            # O editar_tecido.html já exibe as mensagens, então voltamos para ele.
+            messages.error(
+                request,
+                f'Não é possível excluir o tecido "{tecido.descricao}" porque ele está em uso '
+                f'por produtos. Inative o tecido em vez de excluir.'
+            )
+            return redirect('editar_tecido', pk=tecido.pk)
+        return redirect('lista_tecido')
+ 
     context = {
         'tecido': tecido,
-        'objeto_nome': tecido.descricao
     }
     return render(request, 'estoque/tecido/confirmar_exclusao.html', context)

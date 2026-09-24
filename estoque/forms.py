@@ -58,14 +58,23 @@ class StatusForm(forms.ModelForm):
 class TecidoForm(forms.ModelForm):
     class Meta:
         model = Tecido
-        fields = ['descricao', 'composicao', 'ativo']
+        fields = ['descricao', 'ativo']
         widgets = {
             'descricao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: GABARDINE ITALIANA'}),
-            'composicao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: 95% LÃ, 5% ELASTANO'}),
             'ativo': forms.CheckboxInput(attrs={
                 'class': 'w-5 h-5 rounded border-stone-300 text-[#B4977A] focus:ring-[#B4977A]'
             }),
         }
+        error_messages = {
+            'descricao': {
+                'unique': 'Já existe um tecido cadastrado com este nome.',
+            },
+        }
+ 
+    def clean_descricao(self):
+        # O model grava em maiúsculas no save(). Normalizamos aqui também para que
+        # a checagem de duplicidade compare "seda" com "SEDA" antes de salvar.
+        return self.cleaned_data['descricao'].strip().upper()
 
 class ProdutoForm(forms.ModelForm):
     class Meta:
