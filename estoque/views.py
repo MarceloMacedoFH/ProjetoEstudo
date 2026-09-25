@@ -9,6 +9,15 @@ from django.urls import reverse
 from .models import Categoria, Status, Conservacao, Cor, Produto, Tecido
 from .forms import CategoriaForm, StatusForm, ConservacaoForm, CorForm, ProdutoForm, TecidoForm
 
+
+def _url_lista(nome_url, query=None):
+    """Monta a URL da lista, já com a busca codificada (acentos, espaços, &, etc.)."""
+    url = reverse(nome_url)
+    if query:
+        url = f'{url}?{urlencode({"q": query})}'
+    return url
+
+
 #HOME
 def home(request):
     # Por enquanto retornamos valores fictícios até que as tabelas de 
@@ -29,10 +38,16 @@ def criar_categoria(request):
     if request.method == 'POST':
         form = CategoriaForm(request.POST)
         if form.is_valid():
-            categoria = form.save()
-            if categoria.categoria_pai:
-                return redirect(f'{reverse('lista_categorias')}?q={categoria.categoria_pai}')
-            return redirect(f'{reverse('lista_categorias')}?q={categoria.descricao}')   
+            try:
+                categoria = form.save()
+            except IntegrityError:
+                # Rede de segurança: o form já barra duplicados, mas isso cobre
+                # o caso de dois cadastros simultâneos com o mesmo nome.
+                form.add_error(None, 'Já existe uma categoria com este nome neste nível.')
+            else:
+                if categoria.categoria_pai:
+                    return redirect(_url_lista('lista_categorias', categoria.categoria_pai.descricao))
+                return redirect(_url_lista('lista_categorias', categoria.descricao))
     else:
         form = CategoriaForm()
     
@@ -49,8 +64,8 @@ def editar_categoria(request, pk):
         if form.is_valid():
             categoria = form.save()
             if categoria.categoria_pai:
-                return redirect(f'{reverse('lista_categorias')}?q={categoria.categoria_pai}')
-            return redirect(f'{reverse('lista_categorias')}?q={categoria.descricao}')
+                return redirect(_url_lista('lista_categorias', categoria.categoria_pai.descricao))
+            return redirect(_url_lista('lista_categorias', categoria.descricao))
     else:
         form = CategoriaForm(instance=categoria)
     
@@ -63,7 +78,16 @@ def editar_categoria(request, pk):
 def excluir_categoria(request, pk):
     categoria = get_object_or_404(Categoria, pk=pk)
     if request.method == 'POST':
-        categoria.delete()
+        try:
+            categoria.delete()
+        except ProtectedError:
+            # O editar_categoria.html exibe as mensagens, então voltamos para ele.
+            messages.error(
+                request,
+                f'Não é possível excluir a categoria "{categoria.descricao}" porque ela possui '
+                f'subcategorias ou está em uso por produtos.'
+            )
+            return redirect('editar_categorias', pk=categoria.pk)
         return redirect('lista_categorias')
     return render(request, 'estoque/categoria/confirmar_exclusao.html', {'categoria': categoria})
 
@@ -116,8 +140,13 @@ def criar_produto(request):
     if request.method == 'POST':
         form = ProdutoForm(request.POST)
         if form.is_valid():
-            produto = form.save()
-            return redirect(f'{reverse('lista_produto')}?q={produto.codigo}')
+            try:
+                produto = form.save()
+            except IntegrityError:
+                # Rede de segurança para cadastros simultâneos com o mesmo código.
+                form.add_error('codigo', 'Já existe um produto cadastrado com este código.')
+            else:
+                return redirect(_url_lista('lista_produto', produto.codigo))
     else:
         form = ProdutoForm()
     
@@ -129,7 +158,7 @@ def editar_produto(request, pk):
         form = ProdutoForm(request.POST, instance=produto)
         if form.is_valid():
             produto = form.save()
-            return redirect(f'{reverse('lista_produto')}?q={produto.codigo}')
+            return redirect(_url_lista('lista_produto', produto.codigo))
     else:
         form = ProdutoForm(instance=produto)
     
@@ -143,7 +172,16 @@ def editar_produto(request, pk):
 def excluir_produto(request, pk):
     produto = get_object_or_404(Produto, pk=pk)
     if request.method == 'POST':
-        produto.delete()
+        try:
+            produto.delete()
+        except ProtectedError:
+            # O editar_produto.html exibe as mensagens, então voltamos para ele.
+            messages.error(
+                request,
+                f'Não é possível excluir o produto "{produto.codigo}" porque ele está vinculado '
+                f'a outros registros. Inative o produto em vez de excluir.'
+            )
+            return redirect('editar_produto', pk=produto.pk)
         return redirect('lista_produto')
     
     return render(request, 'estoque/produto/confirmar_exclusao.html', {'produto': produto})
@@ -170,8 +208,13 @@ def criar_status(request):
     if request.method == 'POST':
         form = StatusForm(request.POST)
         if form.is_valid():
-            status = form.save()
-            return redirect(f'{reverse('lista_status')}?q={status.descricao}')
+            try:
+                status = form.save()
+            except IntegrityError:
+                # Rede de segurança para cadastros simultâneos com a mesma descrição.
+                form.add_error('descricao', 'Já existe um status cadastrado com esta descrição.')
+            else:
+                return redirect(_url_lista('lista_status', status.descricao))
     else:
         form = StatusForm()
     
@@ -187,7 +230,7 @@ def editar_status(request, pk):
         form = StatusForm(request.POST, instance=status)
         if form.is_valid():
             status = form.save()
-            return redirect(f'{reverse('lista_status')}?q={status.descricao}')
+            return redirect(_url_lista('lista_status', status.descricao))
     else:
         form = StatusForm(instance=status)
     
@@ -202,7 +245,16 @@ def excluir_status(request, pk):
     status = get_object_or_404(Status, pk=pk)
 
     if request.method == 'POST':
-        status.delete()
+        try:
+            status.delete()
+        except ProtectedError:
+            # O editar_status.html exibe as mensagens, então voltamos para ele.
+            messages.error(
+                request,
+                f'Não é possível excluir o status "{status.descricao}" porque ele está em uso '
+                f'por produtos. Inative o status em vez de excluir.'
+            )
+            return redirect('editar_status', pk=status.pk)
         return redirect('lista_status')
 
     return render(request, 'estoque/status/confirmar_exclusao.html', {'status': status})
@@ -228,9 +280,15 @@ def criar_conservacao(request):
     if request.method == 'POST':
         form = ConservacaoForm(request.POST)
         if form.is_valid():
-            conser = form.save()
-            return redirect(f'{reverse('lista_conservacao')}?q={conser.descricao}')  
-    form = ConservacaoForm()
+            try:
+                conser = form.save()
+            except IntegrityError:
+                # Rede de segurança para cadastros simultâneos com a mesma descrição.
+                form.add_error('descricao', 'Já existe uma conservação cadastrada com esta descrição.')
+            else:
+                return redirect(_url_lista('lista_conservacao', conser.descricao))
+    else:
+        form = ConservacaoForm()
     return render(request, 'estoque/conservacao/criar_conservacao.html', {'form': form})
 
 def editar_conservacao(request, pk):
@@ -239,7 +297,7 @@ def editar_conservacao(request, pk):
         form = ConservacaoForm(request.POST, instance=conservacao)
         if form.is_valid():
             conser = form.save()
-            return redirect(f'{reverse('lista_conservacao')}?q={conser.descricao}')
+            return redirect(_url_lista('lista_conservacao', conser.descricao))
     else:
         form = ConservacaoForm(instance=conservacao)
     
@@ -252,7 +310,16 @@ def editar_conservacao(request, pk):
 def excluir_conservacao(request, pk):
     conservacao = get_object_or_404(Conservacao, pk=pk)
     if request.method == 'POST':
-        conservacao.delete()
+        try:
+            conservacao.delete()
+        except ProtectedError:
+            # O editar_conservacao.html exibe as mensagens, então voltamos para ele.
+            messages.error(
+                request,
+                f'Não é possível excluir a conservação "{conservacao.descricao}" porque ela está '
+                f'em uso por produtos. Inative a conservação em vez de excluir.'
+            )
+            return redirect('editar_conservacao', pk=conservacao.pk)
         return redirect('lista_conservacao')
     
     return render(request, 'estoque/conservacao/confirmar_exclusao.html', {'conservacao': conservacao})
@@ -277,8 +344,13 @@ def criar_cor(request):
     if request.method == 'POST':
         form = CorForm(request.POST)
         if form.is_valid():
-            cor = form.save()
-            return redirect(f'{reverse('lista_cor')}?q={cor.descricao}')
+            try:
+                cor = form.save()
+            except IntegrityError:
+                # Rede de segurança para cadastros simultâneos com o mesmo nome.
+                form.add_error('descricao', 'Já existe uma cor cadastrada com este nome.')
+            else:
+                return redirect(_url_lista('lista_cor', cor.descricao))
     else:
         form = CorForm()
     return render(request, 'estoque/cor/criar_cor.html', {'form': form})
@@ -289,7 +361,7 @@ def editar_cor(request, pk):
         form = CorForm(request.POST, instance=cor)
         if form.is_valid():
             cor = form.save()
-            return redirect(f'{reverse('lista_cor')}?q={cor.descricao}')
+            return redirect(_url_lista('lista_cor', cor.descricao))
     else:
         form = CorForm(instance=cor)
     
@@ -302,20 +374,21 @@ def editar_cor(request, pk):
 def excluir_cor(request, pk):
     cor = get_object_or_404(Cor, pk=pk)
     if request.method == 'POST':
-        cor.delete()
+        try:
+            cor.delete()
+        except ProtectedError:
+            # O editar_cor.html exibe as mensagens, então voltamos para ele.
+            messages.error(
+                request,
+                f'Não é possível excluir a cor "{cor.descricao}" porque ela está em uso '
+                f'por produtos. Inative a cor em vez de excluir.'
+            )
+            return redirect('editar_cor', pk=cor.pk)
         return redirect('lista_cor')
     return render(request, 'estoque/cor/confirmar_exclusao.html', {'cor': cor})
 
 
 #Metodos Tecido
-def _url_lista_tecido(query=None):
-    """Monta a URL da lista, já com a busca codificada (acentos, espaços, &, etc.)."""
-    url = reverse('lista_tecido')
-    if query:
-        url = f'{url}?{urlencode({"q": query})}'
-    return url
- 
- 
 def lista_tecido(request):
     query = request.GET.get('q')
     tecidos = Tecido.objects.all().order_by('descricao')
@@ -341,7 +414,7 @@ def criar_tecido(request):
                 # o caso de dois cadastros simultâneos com o mesmo nome.
                 form.add_error('descricao', 'Já existe um tecido cadastrado com este nome.')
             else:
-                return redirect(_url_lista_tecido(tecido.descricao))
+                return redirect(_url_lista('lista_tecido', tecido.descricao))
     else:
         form = TecidoForm()
  
@@ -357,7 +430,7 @@ def editar_tecido(request, pk):
         form = TecidoForm(request.POST, instance=tecido)
         if form.is_valid():
             tecido = form.save()
-            return redirect(_url_lista_tecido(tecido.descricao))
+            return redirect(_url_lista('lista_tecido', tecido.descricao))
     else:
         form = TecidoForm(instance=tecido)
  

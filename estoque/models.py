@@ -107,8 +107,6 @@ class Tecido(models.Model):
         ordering = ['descricao']
 
     def __str__(self):
-        if self.composicao:
-            return f"{self.descricao}"
         return self.descricao
 
     def save(self, *args, **kwargs):

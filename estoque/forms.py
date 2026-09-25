@@ -1,4 +1,5 @@
 from django import forms
+from django.core.exceptions import NON_FIELD_ERRORS
 from .models import Categoria, Status, Conservacao, Cor, Produto, Tecido
 
 class CategoriaForm(forms.ModelForm):
@@ -13,6 +14,12 @@ class CategoriaForm(forms.ModelForm):
             'categoria_pai': forms.Select(attrs={
                 'class': 'form-control'
             }),
+        }
+        error_messages = {
+            # Mensagem do unique_together (descricao + categoria_pai) quando há categoria pai
+            NON_FIELD_ERRORS: {
+                'unique_together': 'Já existe uma categoria com este nome neste nível.',
+            },
         }
 
     def __init__(self, *args, **kwargs):
@@ -29,8 +36,14 @@ class CategoriaForm(forms.ModelForm):
 
         self.fields['categoria_pai'].queryset = qs
 
+    def clean_descricao(self):
+        # O model grava em maiúsculas no save(). Normalizamos aqui também para que
+        # a checagem de duplicidade compare "terno" com "TERNO" antes de salvar.
+        return self.cleaned_data['descricao'].strip().upper()
+
     def clean(self):
         cleaned_data = super().clean()
+        descricao = cleaned_data.get('descricao')
         categoria_pai = cleaned_data.get('categoria_pai')
         
         # Validação extra de segurança para garantir o mesmo princípio do __init__
@@ -38,6 +51,15 @@ class CategoriaForm(forms.ModelForm):
             raise forms.ValidationError(
                 {"categoria_pai": "Uma categoria não pode ser pai de si mesma."}
             )
+
+        # O unique_together do model NÃO é verificado quando categoria_pai é vazio
+        # (NULL nunca é igual a NULL). Por isso checamos as categorias principais à mão.
+        if descricao and categoria_pai is None:
+            duplicadas = Categoria.objects.filter(descricao=descricao, categoria_pai__isnull=True)
+            if self.instance.pk:
+                duplicadas = duplicadas.exclude(pk=self.instance.pk)
+            if duplicadas.exists():
+                self.add_error('descricao', 'Já existe uma categoria com este nome neste nível.')
             
         return cleaned_data
 
@@ -54,6 +76,14 @@ class StatusForm(forms.ModelForm):
                 'class': 'w-5 h-5 rounded border-stone-300 text-[#B4977A] focus:ring-[#B4977A]'
             }),
         }
+        error_messages = {
+            'descricao': {
+                'unique': 'Já existe um status cadastrado com esta descrição.',
+            },
+        }
+
+    def clean_descricao(self):
+        return self.cleaned_data['descricao'].strip().upper()
 
 class TecidoForm(forms.ModelForm):
     class Meta:
@@ -105,6 +135,15 @@ class ProdutoForm(forms.ModelForm):
                 'class': 'w-5 h-5 rounded border-stone-300 text-[#B4977A] focus:ring-[#B4977A]'
             }),
         }
+        error_messages = {
+            'codigo': {
+                'unique': 'Já existe um produto cadastrado com este código.',
+            },
+        }
+
+    def clean_codigo(self):
+        # O model grava o código em maiúsculas no save(); normalizamos antes da checagem.
+        return self.cleaned_data['codigo'].strip().upper()
 
 class ConservacaoForm(forms.ModelForm):
     class Meta:
@@ -119,6 +158,14 @@ class ConservacaoForm(forms.ModelForm):
                 'class': 'w-5 h-5 rounded border-stone-300 text-[#B4977A] focus:ring-[#B4977A]'
             }),
         }
+        error_messages = {
+            'descricao': {
+                'unique': 'Já existe uma conservação cadastrada com esta descrição.',
+            },
+        }
+
+    def clean_descricao(self):
+        return self.cleaned_data['descricao'].strip().upper()
 
 class CorForm(forms.ModelForm):
     class Meta:
@@ -138,3 +185,11 @@ class CorForm(forms.ModelForm):
                 'class': 'w-5 h-5 rounded border-stone-300 text-[#B4977A] focus:ring-[#B4977A]'
             }),
         }
+        error_messages = {
+            'descricao': {
+                'unique': 'Já existe uma cor cadastrada com este nome.',
+            },
+        }
+
+    def clean_descricao(self):
+        return self.cleaned_data['descricao'].strip().upper()
