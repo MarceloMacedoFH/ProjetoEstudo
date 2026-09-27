@@ -1,7 +1,20 @@
+import re
+
 from django import forms
 from django.forms import inlineformset_factory
 
 from .models import Locacao, ItemLocacao
+
+
+def _formatar_cliente_com_cpf(cliente):
+    """Usado como label do select de cliente: 'NOME (000.000.000-00)'."""
+    cpf_digitos = re.sub(r'\D', '', cliente.cpf or '')
+    if len(cpf_digitos) == 11:
+        cpf_formatado = f"{cpf_digitos[0:3]}.{cpf_digitos[3:6]}.{cpf_digitos[6:9]}-{cpf_digitos[9:11]}"
+        return f"{cliente.nome} ({cpf_formatado})"
+    # CPF fora do padrão (não tem 11 dígitos numéricos) — sinaliza em vez de
+    # esconder o problema, pra facilitar encontrar cadastros com erro de digitação.
+    return f"{cliente.nome} (⚠ CPF inválido: {cliente.cpf or 'não informado'})"
 
 
 class LocacaoForm(forms.ModelForm):
@@ -16,6 +29,7 @@ class LocacaoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['cliente'].label_from_instance = _formatar_cliente_com_cpf
         self.fields['indicado_por'].required = False
         self.fields['indicado_por'].label = 'Indicado por (opcional)'
         # Não deixa a própria locação se indicar, e tira canceladas da lista

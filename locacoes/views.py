@@ -231,6 +231,21 @@ def verificar_disponibilidade(request):
 
 
 # ---------------------------------------------------------------------------
+# Autocomplete de produtos (usado na busca da tela de consulta de disponibilidade)
+# ---------------------------------------------------------------------------
+def autocomplete_produtos(request):
+    termo = request.GET.get('termo', '').strip()
+    produtos = []
+    if len(termo) >= 2:
+        produtos = list(
+            Produto.objects.filter(
+                Q(codigo__icontains=termo) | Q(descricao__icontains=termo)
+            ).order_by('codigo')[:10].values('codigo', 'descricao')
+        )
+    return JsonResponse({'produtos': produtos})
+
+
+# ---------------------------------------------------------------------------
 # Tela de consulta de disponibilidade por código de produto
 # ---------------------------------------------------------------------------
 def consulta_disponibilidade(request):

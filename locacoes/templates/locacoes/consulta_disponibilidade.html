@@ -18,11 +18,12 @@
         </div>
 
         <form method="GET" action="{% url 'consulta_disponibilidade' %}" class="flex flex-col md:flex-row gap-4 mb-10">
-            <input type="text" name="codigo" value="{{ codigo|default:'' }}" placeholder="Código do produto"
-                class="flex-1 px-4 py-3 rounded-xl border border-stone-200 focus:border-[#B4977A] focus:ring-1 focus:ring-[#B4977A] outline-none transition-all bg-white/50 placeholder-stone-400">
-            <button type="submit" class="px-8 py-3 bg-[#B4977A] text-white font-bold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20">
-                Consultar
-            </button>
+            <div class="relative flex-1">
+                <input type="text" name="codigo" id="input-codigo" value="{{ codigo|default:'' }}" placeholder="Código ou descrição do produto"
+                    autocomplete="off"
+                    class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-[#B4977A] focus:ring-1 focus:ring-[#B4977A] outline-none transition-all bg-white/50 placeholder-stone-400">
+                <ul id="lista-sugestoes" class="hidden absolute z-20 mt-2 w-full bg-white border border-stone-100 rounded-2xl shadow-lg overflow-hidden max-h-72 overflow-y-auto"></ul>
+            </div>
         </form>
 
         {% if produto %}
@@ -37,6 +38,7 @@
                     <tr class="text-[12px] uppercase tracking-[0.2em] text-stone-600 font-bold">
                         <th class="px-6 py-4">Retirada</th>
                         <th class="px-6 py-4">Devolução Prevista</th>
+                        <th class="px-6 py-4">Valor</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-stone-50">
@@ -44,6 +46,7 @@
                     <tr>
                         <td class="px-6 py-4 text-sm text-stone-700 font-semibold">{{ item.locacao.data_retirada|date:"d/m/Y" }}</td>
                         <td class="px-6 py-4 text-sm text-stone-600">{{ item.locacao.data_devolucao_prevista|date:"d/m/Y" }}</td>
+                        <td class="px-6 py-4 text-sm text-stone-600">{{ produto.preco_aluguel_padrao }}</td>
                     </tr>
                     {% empty %}
                     <tr>
@@ -58,4 +61,62 @@
         {% endif %}
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('input-codigo');
+    const lista = document.getElementById('lista-sugestoes');
+    let timeoutId = null;
+
+    function esconderLista() {
+        lista.classList.add('hidden');
+        lista.innerHTML = '';
+    }
+
+    function buscarSugestoes(termo) {
+        fetch(`{% url 'autocomplete_produtos' %}?termo=${encodeURIComponent(termo)}`)
+            .then(response => response.json())
+            .then(data => {
+                lista.innerHTML = '';
+                if (!data.produtos || data.produtos.length === 0) {
+                    esconderLista();
+                    return;
+                }
+                data.produtos.forEach(produto => {
+                    const li = document.createElement('li');
+                    li.className = 'px-5 py-3 text-sm cursor-pointer hover:bg-stone-50 transition-colors border-b border-stone-50 last:border-0';
+                    li.innerHTML = `<span class="font-semibold text-stone-800">${produto.codigo}</span> <span class="text-stone-500">— ${produto.descricao}</span>`;
+                    li.addEventListener('click', function () {
+                        input.value = produto.codigo;
+                        esconderLista();
+                        input.form.submit();
+                    });
+                    lista.appendChild(li);
+                });
+                lista.classList.remove('hidden');
+            })
+            .catch(() => esconderLista());
+    }
+
+    input.addEventListener('input', function () {
+        const termo = input.value.trim();
+        clearTimeout(timeoutId);
+        if (termo.length < 2) {
+            esconderLista();
+            return;
+        }
+        timeoutId = setTimeout(() => buscarSugestoes(termo), 250);
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!lista.contains(e.target) && e.target !== input) {
+            esconderLista();
+        }
+    });
+
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') esconderLista();
+    });
+});
+</script>
 {% endblock %}
