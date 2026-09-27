@@ -56,13 +56,28 @@
                     </a>
                 </div>
             </div>
-        
-            <a href="#" class="flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all hover-link group">
-                <span class="flex items-center">
-                    <svg class="w-5 h-5 mr-4 text-stone-500 group-hover:text-stone-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    Recentes
-                </span>
-            </a>
+
+            <div>
+                <button id="btn-locacoes" class="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all hover-link focus:outline-none group">
+                    <span class="flex items-center">
+                        <svg class="w-5 h-5 mr-4 text-stone-500 group-hover:text-stone-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Locações
+                    </span>
+                    <svg id="seta-locacoes" class="w-4 h-4 transform transition-transform duration-250 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+
+                <div id="submenu-locacoes" class="hidden pl-12 mt-2 space-y-1 border-l border-stone-300 ml-6">
+                    <a href="{% url 'lista_locacoes' %}" class="flex items-center px-4 py-2 rounded-lg transition-colors hover-link text-xs">
+                        <span>Locações</span>
+                    </a>
+                    <a href="{% url 'consulta_disponibilidade' %}" class="flex items-center px-4 py-2 rounded-lg transition-colors hover-link text-xs">
+                        <span>Consultar Disponibilidade</span>
+                    </a>
+                </div>
+            </div>
+
         </nav>
 
         <div class="sidebar-footer">
@@ -91,6 +106,13 @@
     </main>
 
 <script>
+    document.getElementById('btn-locacoes').addEventListener('click', function() {
+        const submenu = document.getElementById('submenu-locacoes');
+        const seta = document.getElementById('seta-locacoes');
+        submenu.classList.toggle('hidden');
+        seta.classList.toggle('rotate-180');
+    });
+    
     document.getElementById('btn-cadastro').addEventListener('click', function() {
         const submenu = document.getElementById('submenu-cadastro');
         const seta = document.getElementById('seta-cadastro');

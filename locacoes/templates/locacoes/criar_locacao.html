@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}Nova Locação - Center Noivas{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <div class="premium-card p-10">
+        <div class="mb-10 text-center">
+            {% if form.errors or formset.non_form_errors or messages %}
+            <div class="mb-8 text-left">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-4 rounded-2xl border {% if message.tags == 'error' %}bg-rose-50 border-rose-100 text-rose-700{% else %}bg-emerald-50 border-emerald-100 text-emerald-700{% endif %} shadow-sm">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if form.errors or formset.non_form_errors %}
+                    <div class="p-6 bg-rose-50 border border-rose-100 rounded-2xl shadow-sm">
+                        <div class="flex items-center gap-3 mb-4 text-rose-800">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <h3 class="font-bold uppercase tracking-widest text-[15px]">Por favor, corrija os erros abaixo:</h3>
+                        </div>
+                        <ul class="space-y-1">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li class="text-sm text-rose-600 flex items-start gap-2">
+                                        <span class="font-semibold whitespace-nowrap">{{ field.label }}:</span>
+                                        <span>{{ error }}</span>
+                                    </li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in formset.non_form_errors %}
+                                <li class="text-sm text-rose-600">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            <h1 class="brand-font text-4xl text-stone-800 mb-2">Nova Locação</h1>
+            <p class="text-stone-600 italic">Preencha os dados do cliente e as peças que serão alugadas</p>
+        </div>
+
+        <form method="POST" id="form-locacao" class="space-y-10">
+            {% csrf_token %}
+
+            <!-- Seção: Dados da locação -->
+            <div>
+                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-6 border-b border-stone-100 pb-2">Dados da Locação</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Cliente</label>
+                        {{ form.cliente }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Data de Retirada</label>
+                        {{ form.data_retirada }}
+                        <p class="text-xs text-stone-400 italic mt-2" id="datas-calculadas"></p>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Indicado por (opcional)</label>
+                        {{ form.indicado_por }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção: Pagamento -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Sinal Pago (R$)</label>
+                    {{ form.sinal_pago }}
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Desconto / Ajuste (R$)</label>
+                    {{ form.desconto_ajuste }}
+                </div>
+            </div>
+
+            <!-- Seção: Peças da locação (formset dinâmico) -->
+            <div>
+                <div class="flex items-center justify-between border-b border-stone-100 pb-2 mb-6">
+                    <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold">Peças da Locação</h2>
+                    <button type="button" id="btn-add-item" class="inline-flex items-center px-4 py-2 bg-stone-100 text-stone-700 text-xs font-bold uppercase tracking-widest rounded-full hover:bg-stone-200 transition-all">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        Adicionar Peça
+                    </button>
+                </div>
+
+                {{ formset.management_form }}
+
+                <div id="itens-container" class="space-y-3">
+                    {% for item_form in formset %}
+                    <div class="item-linha grid grid-cols-1 md:grid-cols-12 gap-3 items-start bg-stone-50/60 p-4 rounded-2xl border border-stone-100">
+                        <div class="hidden">{{ item_form.id }}</div>
+                        <div class="md:col-span-6">
+                            <label class="block text-[11px] font-bold text-stone-400 mb-1 uppercase tracking-wider">Produto</label>
+                            {{ item_form.produto }}
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-[11px] font-bold text-stone-400 mb-1 uppercase tracking-wider">Valor (R$)</label>
+                            {{ item_form.valor_aplicado }}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[11px] font-bold text-stone-400 mb-1 uppercase tracking-wider">Disponibilidade</label>
+                            <p class="disponibilidade-indicador text-xs font-semibold text-stone-400 pt-2.5">—</p>
+                        </div>
+                        <div class="md:col-span-1 flex items-end justify-end h-full pt-5">
+                            {% if item_form.DELETE %}
+                                <label class="hidden">{{ item_form.DELETE }}</label>
+                            {% endif %}
+                            <button type="button" class="btn-remove-item p-2 text-stone-400 hover:text-red-500 transition-colors" title="Remover peça">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                        {% for error in item_form.non_field_errors %}
+                            <p class="md:col-span-12 text-xs text-rose-600">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Template em branco para novas linhas (clonado via JS) -->
+                <template id="template-item-vazio">
+                    <div class="item-linha grid grid-cols-1 md:grid-cols-12 gap-3 items-start bg-stone-50/60 p-4 rounded-2xl border border-stone-100">
+                        <div class="md:col-span-6">
+                            <label class="block text-[11px] font-bold text-stone-400 mb-1 uppercase tracking-wider">Produto</label>
+                            {{ formset.empty_form.produto }}
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-[11px] font-bold text-stone-400 mb-1 uppercase tracking-wider">Valor (R$)</label>
+                            {{ formset.empty_form.valor_aplicado }}
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[11px] font-bold text-stone-400 mb-1 uppercase tracking-wider">Disponibilidade</label>
+                            <p class="disponibilidade-indicador text-xs font-semibold text-stone-400 pt-2.5">—</p>
+                        </div>
+                        <div class="md:col-span-1 flex items-end justify-end h-full pt-5">
+                            <button type="button" class="btn-remove-item p-2 text-stone-400 hover:text-red-500 transition-colors" title="Remover peça">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Ações -->
+            <div class="flex items-center justify-end gap-4 pt-6 border-t border-stone-100">
+                <a href="{% url 'lista_locacoes' %}" class="text-stone-400 hover:text-stone-600 font-medium transition-colors">Cancelar</a>
+                <button type="submit" class="px-10 py-4 bg-[#B4977A] text-white font-bold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20">
+                    Salvar Locação
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('itens-container');
+    const totalFormsInput = document.querySelector('#id_itemlocacao_set-TOTAL_FORMS');
+    const template = document.getElementById('template-item-vazio').innerHTML;
+    const dataRetiradaInput = document.querySelector('#id_data_retirada');
+    const datasCalculadasEl = document.getElementById('datas-calculadas');
+
+    // --- Adicionar nova linha de peça ---
+    document.getElementById('btn-add-item').addEventListener('click', function () {
+        const formIndex = parseInt(totalFormsInput.value, 10);
+        const novoHtml = template.replace(/__prefix__/g, formIndex);
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = novoHtml.trim();
+        container.appendChild(wrapper.firstChild);
+        totalFormsInput.value = formIndex + 1;
+    });
+
+    // --- Remover linha de peça (marca DELETE se já existir, ou some se for nova) ---
+    container.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-remove-item');
+        if (!btn) return;
+        const linha = btn.closest('.item-linha');
+        const deleteCheckbox = linha.querySelector('input[type="checkbox"][name$="-DELETE"]');
+        if (deleteCheckbox) {
+            deleteCheckbox.checked = true;
+            linha.style.display = 'none';
+        } else {
+            linha.remove();
+        }
+    });
+
+    // --- Checagem de disponibilidade via AJAX ---
+    function checarDisponibilidade(linha) {
+        const produtoSelect = linha.querySelector('.item-produto-select');
+        const indicador = linha.querySelector('.disponibilidade-indicador');
+        if (!produtoSelect || !indicador) return;
+
+        const produtoId = produtoSelect.value;
+        const dataRetirada = dataRetiradaInput.value;
+
+        if (!produtoId || !dataRetirada) {
+            indicador.textContent = '—';
+            indicador.className = 'disponibilidade-indicador text-xs font-semibold text-stone-400 pt-2.5';
+            return;
+        }
+
+        indicador.textContent = 'Verificando...';
+        indicador.className = 'disponibilidade-indicador text-xs font-semibold text-stone-400 pt-2.5';
+
+        fetch(`{% url 'verificar_disponibilidade' %}?produto_id=${produtoId}&data_retirada=${dataRetirada}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.erro) {
+                    indicador.textContent = '—';
+                    return;
+                }
+                if (data.disponivel) {
+                    indicador.textContent = '✓ Disponível';
+                    indicador.className = 'disponibilidade-indicador text-xs font-semibold text-emerald-600 pt-2.5';
+                } else {
+                    indicador.textContent = '⚠ Indisponível';
+                    indicador.className = 'disponibilidade-indicador text-xs font-semibold text-red-500 pt-2.5';
+                }
+                if (datasCalculadasEl) {
+                    datasCalculadasEl.textContent = `Devolução prevista: ${data.data_devolucao_prevista}`;
+                }
+            })
+            .catch(() => {
+                indicador.textContent = '—';
+            });
+    }
+
+    container.addEventListener('change', function (e) {
+        if (e.target.classList.contains('item-produto-select')) {
+            checarDisponibilidade(e.target.closest('.item-linha'));
+        }
+    });
+
+    if (dataRetiradaInput) {
+        dataRetiradaInput.addEventListener('change', function () {
+            document.querySelectorAll('.item-linha').forEach(checarDisponibilidade);
+        });
+    }
+});
+</script>
+{% endblock %}

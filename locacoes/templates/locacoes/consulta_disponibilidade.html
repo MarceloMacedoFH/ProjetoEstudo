@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Consultar Disponibilidade - Center Noivas{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+    <div class="premium-card p-10">
+        <div class="mb-10 text-center">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="mb-4 p-4 rounded-2xl border {% if message.tags == 'error' %}bg-rose-50 border-rose-100 text-rose-700{% else %}bg-emerald-50 border-emerald-100 text-emerald-700{% endif %} shadow-sm text-left">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            <h1 class="brand-font text-4xl text-stone-800 mb-2">Consultar Disponibilidade</h1>
+            <p class="text-stone-600 italic">Informe o código do produto para ver as datas já reservadas</p>
+        </div>
+
+        <form method="GET" action="{% url 'consulta_disponibilidade' %}" class="flex flex-col md:flex-row gap-4 mb-10">
+            <input type="text" name="codigo" value="{{ codigo|default:'' }}" placeholder="Código do produto"
+                class="flex-1 px-4 py-3 rounded-xl border border-stone-200 focus:border-[#B4977A] focus:ring-1 focus:ring-[#B4977A] outline-none transition-all bg-white/50 placeholder-stone-400">
+            <button type="submit" class="px-8 py-3 bg-[#B4977A] text-white font-bold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20">
+                Consultar
+            </button>
+        </form>
+
+        {% if produto %}
+        <div class="mb-6 p-5 bg-stone-50 rounded-2xl border border-stone-100">
+            <p class="text-xs uppercase tracking-widest text-stone-400 font-bold mb-1">Produto encontrado</p>
+            <p class="text-stone-800 font-semibold text-lg">{{ produto.codigo }} — {{ produto.descricao }}</p>
+        </div>
+
+        <div class="overflow-hidden rounded-[1.5rem] border border-stone-100 bg-white/40 backdrop-blur-sm">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="text-[12px] uppercase tracking-[0.2em] text-stone-600 font-bold">
+                        <th class="px-6 py-4">Retirada</th>
+                        <th class="px-6 py-4">Devolução Prevista</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-stone-50">
+                    {% for item in reservas %}
+                    <tr>
+                        <td class="px-6 py-4 text-sm text-stone-700 font-semibold">{{ item.locacao.data_retirada|date:"d/m/Y" }}</td>
+                        <td class="px-6 py-4 text-sm text-stone-600">{{ item.locacao.data_devolucao_prevista|date:"d/m/Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="px-6 py-12 text-center text-stone-400 italic">
+                            Nenhuma reserva futura — peça livre para qualquer data.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
