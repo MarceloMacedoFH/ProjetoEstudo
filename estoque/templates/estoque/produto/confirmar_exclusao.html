@@ -17,7 +17,7 @@
         <button type="submit" class="px-10 py-4 bg-red-500 text-white rounded-full text-xs uppercase tracking-widest font-semibold hover:bg-red-600 transition-all shadow-lg shadow-red-500/20">
             Sim, excluir permanentemente
         </button>
-        <a href="{% url 'lista_produto' %}" class="text-[11px] uppercase tracking-widest text-stone-400 hover:text-stone-600 font-bold transition-colors py-2">
+        <a href="{% url 'editar_produto' produto.pk %}" class="text-[11px] uppercase tracking-widest text-stone-400 hover:text-stone-600 font-bold transition-colors py-2">
             Cancelar e voltar
         </a>
     </form>

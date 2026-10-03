@@ -21,6 +21,7 @@
 
         <nav class="flex-1 p-6 space-y-4 overflow-y-auto text-sm text-stone-700 font-semibold">
     
+            {% if perms.estoque.view_categoria or perms.clientes.view_cliente or perms.estoque.view_conservacao or perms.estoque.view_cor or perms.estoque.view_produto or perms.estoque.view_status or perms.estoque.view_tecido %}
             <div>
                 <button id="btn-cadastro" class="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all hover-link focus:outline-none group">
                     <span class="flex items-center">
@@ -33,30 +34,46 @@
                 </button>
 
                 <div id="submenu-cadastro" class="hidden pl-12 mt-2 space-y-1 border-l border-stone-300 ml-6">
+                    {% if perms.estoque.view_categoria %}
                     <a href="{% url 'lista_categorias'%}" class="flex items-center px-4 py-2 rounded-xl transition-all hover-link text-[12px] tracking-wider font-bold">
                         <span>Categorias</span>
                     </a>
+                    {% endif %}
+                    {% if perms.clientes.view_cliente %}
                     <a href="{% url 'lista_clientes'%}" class="flex items-center px-4 py-2 rounded-lg transition-colors hover-link text-xs">
                         <span>Clientes</span>
                     </a>
+                    {% endif %}
+                    {% if perms.estoque.view_conservacao %}
                     <a href="{% url 'lista_conservacao'%}" class="flex items-center px-4 py-2 rounded-lg transition-colors hover-link text-xs">
                         <span>Conservações</span>
                     </a>
+                    {% endif %}
+                    {% if perms.estoque.view_cor %}
                     <a href="{% url 'lista_cor'%}" class="flex items-center px-4 py-2 rounded-lg transition-colors hover-link text-xs">
                         <span>Cores</span>
                     </a>
+                    {% endif %}
+                    {% if perms.estoque.view_produto %}
                     <a href="{% url 'lista_produto' %}" class="flex items-center px-4 py-2 rounded-lg transition-colors hover-link text-xs">
                         <span>Produtos</span>
                     </a>
+                    {% endif %}
+                    {% if perms.estoque.view_status %}
                     <a href="{% url 'lista_status' %}" class="flex items-center px-4 py-2 rounded-xl transition-all hover-link text-[12px] tracking-wider font-bold">
                         <span>Status</span>
                     </a>
+                    {% endif %}
+                    {% if perms.estoque.view_tecido %}
                     <a href="{% url 'lista_tecido' %}" class="flex items-center px-4 py-2 rounded-xl transition-all hover-link text-[12px] tracking-wider font-bold">
                         <span>Tecidos</span>
                     </a>
+                    {% endif %}
                 </div>
             </div>
+            {% endif %}
 
+            {% if perms.locacoes.view_locacao or perms.locacoes.view_itemlocacao %}
             <div>
                 <button id="btn-locacoes" class="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all hover-link focus:outline-none group">
                     <span class="flex items-center">
@@ -69,14 +86,26 @@
                 </button>
 
                 <div id="submenu-locacoes" class="hidden pl-12 mt-2 space-y-1 border-l border-stone-300 ml-6">
+                    {% if perms.locacoes.view_locacao %}
                     <a href="{% url 'lista_locacoes' %}" class="flex items-center px-4 py-2 rounded-lg transition-colors hover-link text-xs">
                         <span>Locações</span>
                     </a>
+                    {% endif %}
                     <a href="{% url 'consulta_disponibilidade' %}" class="flex items-center px-4 py-2 rounded-lg transition-colors hover-link text-xs">
                         <span>Consultar Disponibilidade</span>
                     </a>
                 </div>
             </div>
+            {% endif %}
+
+            {% if user.is_superuser %}
+            <div>
+                <a href="{% url 'lista_usuarios' %}" class="w-full flex items-center px-4 py-3.5 rounded-2xl transition-all hover-link group">
+                    <svg class="w-5 h-5 mr-4 text-stone-500 group-hover:text-stone-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Usuários
+                </a>
+            </div>
+            {% endif %}
 
         </nav>
 
@@ -90,8 +119,12 @@
         <header class="glass-effect px-10 py-7 flex items-center justify-between sticky top-0 z-10">
             <h2 class="brand-font text-4xl text-stone-1000 font-light italic">Center Noivas</h2>
             <div class="flex items-center space-x-8 text-[12px] uppercase tracking-widest text-stone-600 font-bold">
-                <span class="hidden sm:inline">Olá, Administrador</span>
+                <span class="hidden sm:inline">Olá, {{ user.first_name|default:user.username }}</span>
                 <div class="w-2 h-2 rounded-full bg-emerald-400/80 shadow-[0_0_12px_rgba(52,211,153,0.4)]"></div>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="uppercase tracking-widest font-bold hover:text-stone-900 transition-colors">Sair</button>
+                </form>
             </div>
         </header>
 
@@ -105,15 +138,30 @@
         </div>
     </main>
 
+<!-- Modal de acesso negado -->
+<div id="modal-acesso-negado" class="{% if not acesso_negado_msg %}hidden {% endif %}fixed inset-0 z-50 flex items-center justify-center bg-stone-900/40 backdrop-blur-sm p-6" role="dialog" aria-modal="true" aria-labelledby="modal-acesso-titulo">
+    <div class="bg-white rounded-3xl p-10 max-w-md w-full text-center shadow-2xl border border-stone-200/60">
+        <div class="mx-auto mb-5 w-14 h-14 rounded-full bg-stone-100 flex items-center justify-center">
+            <svg class="w-7 h-7 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+        </div>
+        <h3 id="modal-acesso-titulo" class="brand-font text-2xl text-stone-800 mb-2">Acesso negado</h3>
+        <p id="modal-acesso-mensagem" class="text-stone-600 text-sm font-light leading-relaxed mb-8">{{ acesso_negado_msg|default:"" }}</p>
+        <button type="button" id="modal-acesso-fechar" class="px-8 py-3 rounded-xl bg-stone-800 text-white text-xs tracking-widest uppercase font-semibold hover:bg-stone-700 transition-colors">
+            Entendi
+        </button>
+    </div>
+</div>
+
 <script>
-    document.getElementById('btn-locacoes').addEventListener('click', function() {
+    // O "?." evita erro quando o menu está oculto por falta de permissão
+    document.getElementById('btn-locacoes')?.addEventListener('click', function() {
         const submenu = document.getElementById('submenu-locacoes');
         const seta = document.getElementById('seta-locacoes');
         submenu.classList.toggle('hidden');
         seta.classList.toggle('rotate-180');
     });
     
-    document.getElementById('btn-cadastro').addEventListener('click', function() {
+    document.getElementById('btn-cadastro')?.addEventListener('click', function() {
         const submenu = document.getElementById('submenu-cadastro');
         const seta = document.getElementById('seta-cadastro');
         
@@ -123,6 +171,44 @@
         // Gira a seta em 180 graus quando aberto
         seta.classList.toggle('rotate-180');
     });
+
+    // ---- Modal de acesso negado ----
+    const modalAcesso = document.getElementById('modal-acesso-negado');
+    const botaoFecharModal = document.getElementById('modal-acesso-fechar');
+
+    function abrirModalAcessoNegado(mensagem) {
+        if (mensagem) document.getElementById('modal-acesso-mensagem').textContent = mensagem;
+        modalAcesso.classList.remove('hidden');
+        botaoFecharModal.focus();
+    }
+
+    function fecharModalAcessoNegado() {
+        modalAcesso.classList.add('hidden');
+    }
+
+    botaoFecharModal.addEventListener('click', fecharModalAcessoNegado);
+    modalAcesso.addEventListener('click', function (e) {
+        if (e.target === modalAcesso) fecharModalAcessoNegado();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') fecharModalAcessoNegado();
+    });
+
+    // Se a página abriu já com o modal visível, foca o botão
+    if (!modalAcesso.classList.contains('hidden')) botaoFecharModal.focus();
+
+    // Chamadas fetch() bloqueadas por falta de permissão também abrem o modal
+    const fetchOriginal = window.fetch;
+    window.fetch = async function (...args) {
+        const resposta = await fetchOriginal.apply(this, args);
+        if (resposta.status === 403) {
+            try {
+                const dados = await resposta.clone().json();
+                if (dados.acesso_negado) abrirModalAcessoNegado(dados.erro);
+            } catch (e) { /* resposta não é JSON */ }
+        }
+        return resposta;
+    };
 </script>
 </body>
 </html>

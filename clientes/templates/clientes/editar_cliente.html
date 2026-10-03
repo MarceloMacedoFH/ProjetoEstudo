@@ -43,7 +43,7 @@
             <p class="text-stone-600 italic">Insira as informações da cliente abaixo</p>
         </div>
 
-        <form method="POST" class="space-y-8">
+        <form method="POST" id="form-cliente" class="space-y-8">
             {% csrf_token %}
 
             <!-- Seção: Pessoal -->
@@ -85,27 +85,48 @@
             <div>
                 <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-6 border-b border-stone-100 pb-2">Localização</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div>{{ form.cep }}</div>
-                    <div class="md:col-span-2">{{ form.endereco }}</div>
-                    <div>{{ form.numero }}</div>
-                    <div>{{ form.bairro }}</div>
-                    <div>{{ form.municipio }}</div>
-                    <div>{{ form.estado }}</div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">CEP</label>
+                        {{ form.cep }}
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Endereço</label>
+                        {{ form.endereco }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Número</label>
+                        {{ form.numero }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Bairro</label>
+                        {{ form.bairro }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Município</label>
+                        {{ form.municipio }}
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Estado (UF)</label>
+                        {{ form.estado }}
+                    </div>
                 </div>
             </div>
 
             <!-- Observações e Ativo -->
             <div class="space-y-4">
                 <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold border-b border-stone-100 pb-2">Observações</h2>
-                {{ form.observacao }}
+                <div>
+                    <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Observações Gerais</label>
+                    {{ form.observacao }}
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-3">
                     <div>
-                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Crédito</label>
+                        <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Crédito (R$)</label>
                         {{ form.credito }}
                     </div>
                 </div>
                 <div class="flex items-center gap-3 p-4 bg-stone-50 rounded-xl">
-                    {{ form.ativo }}
+                    <div>{{ form.ativo }}</div>
                     <span class="text-sm text-stone-700 font-medium">Cliente ativo no sistema</span>
                 </div>
             </div>
@@ -131,17 +152,81 @@
         const bairroField = document.querySelector('#id_bairro');
         const municipioField = document.querySelector('#id_municipio');
         const estadoField = document.querySelector('#id_estado');
+        const cpfField = document.querySelector('#id_cpf');
+        const rgField = document.querySelector('#id_rg');
+        const contatoField = document.querySelector('#id_contato');
+        const btnSubmit = document.querySelector('#btn-submit');
 
+        // --- 1. MÁSCARAS DE ENTRADA ---
+        
+        // Máscara CPF: 000.000.000-00
+        if (cpfField) {
+            cpfField.setAttribute('maxlength', '14');
+            cpfField.addEventListener('input', function(e) {
+                let v = e.target.value.replace(/\D/g, '');
+                v = v.replace(/(\d{3})(\d)/, '$1.$2');
+                v = v.replace(/(\d{3})(\d)/, '$1.$2');
+                v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                e.target.value = v;
+            });
+        }
+
+        // Máscara R.G.: 00.000.000-0
+        if (rgField) {
+            rgField.setAttribute('maxlength', '12');
+            rgField.addEventListener('input', function(e) {
+                let v = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+                // Aplica a formatação genérica de RG (ex: 12.345.678-X)
+                if (v.length > 2 && v.length <= 5) {
+                    v = v.replace(/^(\d{2})(\w)/, '$1.$2');
+                } else if (v.length > 5 && v.length <= 8) {
+                    v = v.replace(/^(\d{2})(\d{3})(\w)/, '$1.$2.$3');
+                } else if (v.length > 8) {
+                    v = v.replace(/^(\d{2})(\d{3})(\d{3})(\w{1,2})$/, '$1.$2.$3-$4');
+                }
+                e.target.value = v;
+            });
+        }
+
+        // Máscara CEP: 00000-000
+        if (cepField) {
+            cepField.setAttribute('maxlength', '9');
+            cepField.addEventListener('input', function(e) {
+                let v = e.target.value.replace(/\D/g, '');
+                v = v.replace(/^(\d{5})(\d)/, '$1-$2');
+                e.target.value = v;
+            });
+        }
+
+        // Máscara WhatsApp / Telefone: (00) 00000-0000
+        if (contatoField) {
+            contatoField.setAttribute('maxlength', '15');
+            contatoField.addEventListener('input', function(e) {
+                let v = e.target.value.replace(/\D/g, '');
+                v = v.replace(/^(\d{2})(\d)/g, '($1) $2');
+                if (v.length > 13) {
+                    v = v.replace(/(\d{5})(\d)/, '$1-$2');
+                } else {
+                    v = v.replace(/(\d{4})(\d)/, '$1-$2');
+                }
+                e.target.value = v;
+            });
+        }
+
+        // --- 2. BUSCA AUTOMÁTICA VIACEP COM DESABILITAÇÃO DE CAMPOS ---
         if (cepField) {
             cepField.addEventListener('blur', function() {
-                // Remove caracteres não numéricos
                 const cep = this.value.replace(/\D/g, '');
 
-                // Valida se o CEP tem 8 dígitos
                 if (cep.length === 8) {
-                    // Feedback visual opcional: desabilitar campos enquanto busca
-                    const fields = [enderecoField, bairroField, municipioField, estadoField];
-                    fields.forEach(f => f.classList.add('opacity-50'));
+                    const fields = [enderecoField, bairroField, municipioField, estadoField].filter(Boolean);
+
+                    // Desabilita campos e botão de envio durante a busca
+                    fields.forEach(f => {
+                        f.classList.add('opacity-50');
+                        f.disabled = true;
+                    });
+                    if (btnSubmit) btnSubmit.disabled = true;
 
                     fetch(`https://viacep.com.br/ws/${cep}/json/`)
                         .then(response => response.json())
@@ -155,7 +240,12 @@
                         })
                         .catch(error => console.error('Erro ao buscar CEP:', error))
                         .finally(() => {
-                            fields.forEach(f => f.classList.remove('opacity-50'));
+                            // Reabilita campos e botão após a busca
+                            fields.forEach(f => {
+                                f.classList.remove('opacity-50');
+                                f.disabled = false;
+                            });
+                            if (btnSubmit) btnSubmit.disabled = false;
                         });
                 }
             });

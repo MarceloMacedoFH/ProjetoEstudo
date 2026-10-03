@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Usuários - Center Noivas{% endblock %}
+
+{% block content %}
+<div class="premium-card p-10">
+
+    <div class="flex items-center justify-between mb-8">
+        <h1 class="brand-font text-3xl text-stone-800">Usuários</h1>
+        <a href="{% url 'criar_usuario' %}" class="px-6 py-3 rounded-xl bg-stone-800 text-white text-xs tracking-widest uppercase font-semibold hover:bg-stone-700 transition-colors">
+            Novo usuário
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="mb-4 px-4 py-3 rounded-xl text-sm border {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-700{% else %}bg-emerald-50 border-emerald-200 text-emerald-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="get" class="mb-6 flex gap-3">
+        <input type="text" name="q" value="{{ query }}" placeholder="Buscar por usuário ou nome..."
+               class="flex-1 px-4 py-3 rounded-xl border border-stone-300 bg-white/70 text-sm focus:outline-none focus:border-stone-500">
+        <button type="submit" class="px-6 py-3 rounded-xl border border-stone-300 text-xs tracking-widest uppercase font-semibold text-stone-700 hover:bg-stone-100 transition-colors">
+            Buscar
+        </button>
+    </form>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm text-stone-700">
+            <thead>
+                <tr class="text-left text-[12px] uppercase tracking-widest text-stone-500 border-b border-stone-200">
+                    <th class="py-3 pr-4">Usuário</th>
+                    <th class="py-3 pr-4">Nome</th>
+                    <th class="py-3 pr-4">Perfil</th>
+                    <th class="py-3 pr-4">Situação</th>
+                    <th class="py-3 text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in usuarios %}
+                <tr class="border-b border-stone-100">
+                    <td class="py-3 pr-4 font-semibold">{{ u.username }}</td>
+                    <td class="py-3 pr-4">{{ u.get_full_name|default:"-" }}</td>
+                    <td class="py-3 pr-4">{% if u.is_superuser %}Administrador{% else %}Usuário{% endif %}</td>
+                    <td class="py-3 pr-4">
+                        {% if u.is_active %}
+                        <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs">Ativo</span>
+                        {% else %}
+                        <span class="px-3 py-1 rounded-full bg-stone-100 text-stone-500 text-xs">Inativo</span>
+                        {% endif %}
+                    </td>
+                    <td class="py-3 text-right whitespace-nowrap">
+                        <a href="{% url 'editar_usuario' u.pk %}" class="text-stone-700 hover:underline mr-4">Editar</a>
+                        {% if u.pk != request.user.pk %}
+                        <form method="post" action="{% url 'alternar_usuario' u.pk %}" class="inline">
+                            {% csrf_token %}
+                            <button type="submit" class="text-stone-500 hover:underline">
+                                {% if u.is_active %}Desativar{% else %}Ativar{% endif %}
+                            </button>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="py-8 text-center text-stone-500">Nenhum usuário encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

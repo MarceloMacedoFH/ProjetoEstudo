@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Acesso negado - Center Noivas{% endblock %}
+
+{% block content %}
+<div class="premium-card p-16">
+    <h1 class="brand-font text-3xl text-stone-800 mb-2">Acesso negado</h1>
+    <p class="text-stone-500 text-base font-light tracking-wide mb-8">
+        Você não tem permissão para acessar esta área. Se precisar de acesso, fale com o administrador do sistema.
+    </p>
+    <a href="{% url 'home' %}" class="px-6 py-3 rounded-xl bg-stone-800 text-white text-xs tracking-widest uppercase font-semibold hover:bg-stone-700 transition-colors">
+        Voltar ao início
+    </a>
+</div>
+{% endblock %}

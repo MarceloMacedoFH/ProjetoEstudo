@@ -118,18 +118,36 @@ class Tecido(models.Model):
 
 class Produto(models.Model):
     GENERO_CHOICES = [
-        ('M', 'Masculino'),
         ('F', 'Feminino'),
-        ('U', 'Unissex'),
         ('I', 'Infantil'),
+        ('M', 'Masculino'),
+        ('U', 'Unissex'),
+    ]
+
+    ORIGEM_CHOICES = [
+        ('IMP', 'Importado'),
+        ('NAC', 'Nacional'),
+    ]
+
+    TIPO_CHOICES = [
+        ('COM', 'Comum'),
+        ('DAM', 'Daminha'),
+        ('DEB', 'Debutante'),
+        ('FES', 'Festa'),
+        ('MAD', 'Madrinha'),
+        ('NVA', 'Noiva'),
+        ('NVO', 'Noivo'),
+        ('PAD', 'Padrinho'),     
     ]
 
     # 1. Informações Básicas
-    descricao = models.CharField(max_length=150, null=False, blank=False, verbose_name="Descrição do Produto")
-    codigo = models.CharField(max_length=50, null=False, blank=False, unique=True, verbose_name="Código Produto")
+    descricao     = models.CharField(max_length=150, null=False, blank=False, verbose_name="Descrição do Produto")
+    codigo        = models.CharField(max_length=50, null=False, blank=False, unique=True, verbose_name="Código Produto")
     codigo_barras = models.CharField(max_length=100, blank=True, null=True, verbose_name="Código de Barras / RFID")
-    observacao = models.TextField(blank=True, null=True, verbose_name="Observação do Estilo")
-    categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT, verbose_name="Categoria")
+    observacao    = models.TextField(blank=True, null=True, verbose_name="Observação do Estilo")
+    categoria     = models.ForeignKey(Categoria, on_delete=models.PROTECT, verbose_name="Categoria")
+    origem        = models.CharField(max_length=3, choices=ORIGEM_CHOICES, verbose_name="Origem do Produto") 
+    tipo          = models.CharField(max_length=3, choices=TIPO_CHOICES, verbose_name="Tipo do Produto")
 
     # 2. Atributos Físicos e Variações
     cor_principal = models.ForeignKey(Cor, on_delete=models.PROTECT, verbose_name='Cor Principal')
@@ -145,8 +163,8 @@ class Produto(models.Model):
     ativo = models.BooleanField(default=True, verbose_name='Ativo')
 
     # 4. Precificação e Valores Financeiros
-    preco_aluguel_padrao = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Preço do Aluguel")
-    preco_custo = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Preço de Custo de Compra")
+    preco_aluguel_padrao = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Preço do Aluguel")
+    preco_custo = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, default=0.00, verbose_name="Preço de Custo de Compra")
     multa_atraso_diaria = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Multa por Dia de Atraso", help_text="Valor cobrado por cada dia de atraso na devolução")
 
 

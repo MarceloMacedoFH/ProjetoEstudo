@@ -29,7 +29,7 @@
         {% if produto %}
         <div class="mb-6 p-5 bg-stone-50 rounded-2xl border border-stone-100">
             <p class="text-xs uppercase tracking-widest text-stone-400 font-bold mb-1">Produto encontrado</p>
-            <p class="text-stone-800 font-semibold text-lg">{{ produto.codigo }} — {{ produto.descricao }}</p>
+            <p class="text-stone-800 font-semibold text-lg">{{ produto.descricao }} - {{produto.tamanho_etiqueta}} -  {{produto.conservacao}} </p>
         </div>
 
         <div class="overflow-hidden rounded-[1.5rem] border border-stone-100 bg-white/40 backdrop-blur-sm">
@@ -50,7 +50,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="2" class="px-6 py-12 text-center text-stone-400 italic">
+                        <td colspan="3" class="px-6 py-12 text-center text-stone-400 italic">
                             Nenhuma reserva futura — peça livre para qualquer data.
                         </td>
                     </tr>

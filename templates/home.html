@@ -8,10 +8,25 @@
         <h1 class="brand-font text-4xl text-stone-800 mb-2">Painel de Controle</h1>
         <p class="text-stone-600 font-normal tracking-wide italic">Visão geral das atividades de hoje e pendências</p>
     </div>
+    
+
+    {% comment %}
+    Cada card tem a sua própria condição de permissão.
+    Provas Agendadas: "ver Locações" ou "ver Consulta de disponibilidade" (atendentes).
+    Os demais cards: somente "ver Locações".
+    Para liberar um card para outro perfil, troque a permissão só no if dele.
+    {% endcomment %}
+
+    {% if not perms.locacoes.view_locacao and not perms.locacoes.view_itemlocacao %}
+    <p class="text-stone-500 text-base font-light tracking-wide">
+        Olá, {{ user.first_name|default:user.username }}. Selecione uma opção no menu lateral para começar.
+    </p>
+    {% endif %}
 
     <!-- Grid de Cards de Indicadores -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
 
+        {% if perms.locacoes.view_locacao %}
         <!-- Card: Alugueis Efetuados -->
         <div class="bg-white/60 border border-stone-100 p-8 rounded-[2rem] hover:shadow-xl transition-all duration-500 group">
             <div class="flex items-center justify-between mb-4">
@@ -25,7 +40,9 @@
             <div class="text-3xl font-bold text-stone-800 mb-1">{{ total_alugados}}</div>
             <div class="text-xs text-stone-500 uppercase font-semibold tracking-wider">Aluguéis Efetuados</div>
         </div>
+        {% endif %}
         
+        {% if perms.locacoes.view_locacao or perms.locacoes.view_itemlocacao %}
         <!-- Card: Provas do Dia -->
         <div class="bg-white/60 border border-stone-100 p-8 rounded-[2rem] hover:shadow-xl transition-all duration-500 group">
             <div class="flex items-center justify-between mb-4">
@@ -37,7 +54,9 @@
             <div class="text-3xl font-bold text-stone-800 mb-1">{{ total_provas }}</div>
             <div class="text-xs text-stone-500 uppercase font-semibold tracking-wider">Provas Agendadas</div>
         </div>
+        {% endif %}
 
+        {% if perms.locacoes.view_locacao %}
         <!-- Card: Retiradas -->
         <div class="bg-white/60 border border-stone-100 p-8 rounded-[2rem] hover:shadow-xl transition-all duration-500 group">
             <div class="flex items-center justify-between mb-4">
@@ -49,7 +68,9 @@
             <div class="text-3xl font-bold text-stone-800 mb-1">{{ total_retiradas }}</div>
             <div class="text-xs text-stone-500 uppercase font-semibold tracking-wider">Peças para Retirar</div>
         </div>
+        {% endif %}
 
+        {% if perms.locacoes.view_locacao %}
         <!-- Card: Devoluções -->
         <div class="bg-white/60 border border-stone-100 p-8 rounded-[2rem] hover:shadow-xl transition-all duration-500 group">
             <div class="flex items-center justify-between mb-4">
@@ -61,7 +82,9 @@
             <div class="text-3xl font-bold text-stone-800 mb-1">{{ total_devolucoes }}</div>
             <div class="text-xs text-stone-500 uppercase font-semibold tracking-wider">Devoluções Esperadas</div>
         </div>
+        {% endif %}
 
+        {% if perms.locacoes.view_locacao %}
         <!-- Card: Atrasos -->
         <div class="bg-white/60 border border-stone-100 p-8 rounded-[2rem] hover:shadow-xl transition-all duration-500 group">
             <div class="flex items-center justify-between mb-4">
@@ -73,9 +96,7 @@
             <div class="text-3xl font-bold text-rose-700 mb-1">{{ total_atrasos }}</div>
             <div class="text-xs text-stone-500 uppercase font-semibold tracking-wider">Peças Atrasadas</div>
         </div>
-
-        
-        
+        {% endif %}
 
     </div>
 </div>

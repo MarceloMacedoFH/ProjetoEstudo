@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if editando %}Editar usuário{% else %}Novo usuário{% endif %} - Center Noivas{% endblock %}
+
+{% block content %}
+<div class="premium-card p-10">
+
+    <h1 class="brand-font text-3xl text-stone-800 mb-8">
+        {% if editando %}Editar usuário{% else %}Novo usuário{% endif %}
+    </h1>
+
+    <form method="post" class="space-y-8">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+            {{ form.non_field_errors.0 }}
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="{{ form.username.id_for_label }}" class="block text-[12px] uppercase tracking-widest text-stone-600 font-bold mb-2">{{ form.username.label }}</label>
+                {{ form.username }}
+                {% for erro in form.username.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
+            </div>
+            <div></div>
+
+            <div>
+                <label for="{{ form.first_name.id_for_label }}" class="block text-[12px] uppercase tracking-widest text-stone-600 font-bold mb-2">{{ form.first_name.label }}</label>
+                {{ form.first_name }}
+                {% for erro in form.first_name.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
+            </div>
+            <div>
+                <label for="{{ form.last_name.id_for_label }}" class="block text-[12px] uppercase tracking-widest text-stone-600 font-bold mb-2">{{ form.last_name.label }}</label>
+                {{ form.last_name }}
+                {% for erro in form.last_name.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
+            </div>
+
+            <div>
+                <label for="{{ form.password1.id_for_label }}" class="block text-[12px] uppercase tracking-widest text-stone-600 font-bold mb-2">{{ form.password1.label }}</label>
+                {{ form.password1 }}
+                {% if editando %}<p class="text-stone-500 text-xs mt-1">Deixe em branco para manter a senha atual.</p>{% endif %}
+                {% for erro in form.password1.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
+            </div>
+            <div>
+                <label for="{{ form.password2.id_for_label }}" class="block text-[12px] uppercase tracking-widest text-stone-600 font-bold mb-2">{{ form.password2.label }}</label>
+                {{ form.password2 }}
+                {% for erro in form.password2.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-8 text-sm text-stone-700">
+            <label class="flex items-center gap-3">
+                {{ form.is_active }} {{ form.is_active.label }}
+            </label>
+            <label class="flex items-center gap-3">
+                {{ form.is_superuser }} {{ form.is_superuser.label }}
+            </label>
+        </div>
+
+        <div id="matriz-permissoes" class="space-y-6 transition-opacity">
+            <div>
+                <h2 class="brand-font text-2xl text-stone-800">Permissões de acesso</h2>
+                <p class="text-stone-500 text-sm font-light mt-1">
+                    Marque o que este usuário pode fazer em cada módulo. Criar, editar e excluir já liberam também o "Ver".
+                    Administradores têm acesso total e ignoram esta tabela.
+                </p>
+            </div>
+
+            {% for grupo in grupos %}
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-stone-700">
+                    <thead>
+                        <tr class="text-left text-[12px] uppercase tracking-widest text-stone-500 border-b border-stone-200">
+                            <th class="py-3 pr-4">{{ grupo.nome }}</th>
+                            {% for acao in acoes %}
+                            <th class="py-3 px-4 text-center">{{ acao.1 }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for linha in grupo.linhas %}
+                        <tr data-linha class="border-b border-stone-100">
+                            <td class="py-3 pr-4">{{ linha.nome }}</td>
+                            {% for c in linha.celulas %}
+                            <td class="py-3 px-4 text-center">
+                                {% if c.codigo %}
+                                <input type="checkbox" name="perms" value="{{ c.codigo }}" class="perm-{{ c.acao }}" {% if c.marcada %}checked{% endif %}>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="flex items-center gap-4">
+            <button type="submit" class="px-8 py-3 rounded-xl bg-stone-800 text-white text-xs tracking-widest uppercase font-semibold hover:bg-stone-700 transition-colors">
+                Salvar
+            </button>
+            <a href="{% url 'lista_usuarios' %}" class="px-8 py-3 rounded-xl border border-stone-300 text-xs tracking-widest uppercase font-semibold text-stone-700 hover:bg-stone-100 transition-colors">
+                Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.querySelectorAll('tr[data-linha]').forEach(function (tr) {
+        const ver = tr.querySelector('.perm-view');
+        const outras = tr.querySelectorAll('.perm-add, .perm-change, .perm-delete');
+        outras.forEach(function (c) {
+            c.addEventListener('change', function () { if (c.checked) ver.checked = true; });
+        });
+        ver.addEventListener('change', function () {
+            if (!ver.checked) outras.forEach(function (c) { c.checked = false; });
+        });
+    });
+
+    const admin = document.getElementById('{{ form.is_superuser.id_for_label }}');
+    const matriz = document.getElementById('matriz-permissoes');
+    function atualizarMatriz() {
+        matriz.classList.toggle('opacity-40', admin.checked);
+        matriz.classList.toggle('pointer-events-none', admin.checked);
+    }
+    admin.addEventListener('change', atualizarMatriz);
+    atualizarMatriz();
+</script>
+{% endblock %}

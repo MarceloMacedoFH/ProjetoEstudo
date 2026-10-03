@@ -107,30 +107,50 @@ class TecidoForm(forms.ModelForm):
         return self.cleaned_data['descricao'].strip().upper()
 
 class ProdutoForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        #Categorias
+        # 1. Busca todas as categorias otimizando as consultas do categoria_pai
+        categorias = list(Categoria.objects.select_related('categoria_pai'))
+
+        # 2. Ordena alfabeticamente pela representação completa (__str__)
+        # Como o seu __str__ gera "PAI -> FILHO", a ordenação alfabética
+        # agrupa automaticamente todos os filhos logo abaixo de seu respectivo pai!
+        categorias_ordenadas = sorted(categorias, key=lambda c: str(c))
+
+        # 3. Atualiza os choices do campo no formulário
+        self.fields['categoria'].choices = [('', '---------')] + [
+            (c.id, str(c)) for c in categorias_ordenadas
+        ]
+        
     class Meta:
         model = Produto
         fields = [
-            'descricao', 'codigo', 'codigo_barras', 'categoria',
+            'descricao', 'codigo', 'codigo_barras', 'categoria', 'origem', 'tipo',
             'cor_principal', 'tecido', 'tamanho_etiqueta', 'genero', 'marca_estilista', 
-            'status', 'conservacao', 'preco_aluguel_padrao', 'preco_custo', 
+            'status', 'conservacao','total_locacoes', 'preco_aluguel_padrao', 'preco_custo', 
             'multa_atraso_diaria', 'observacao', 'ativo'
         ]
         widgets = {
-            'descricao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Vestido Sereia Renda'}),
-            'codigo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'REF-001'}),
-            'codigo_barras': forms.TextInput(attrs={'class': 'form-control'}),
+            'descricao': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: Terno Slim Azul Marinho', 'autocomplete': 'off'}),
+            'codigo': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
+            'codigo_barras': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'categoria': forms.Select(attrs={'class': 'form-control'}),
+            'origem': forms.Select(attrs={'class': 'form-control'}),
+            'tipo': forms.Select(attrs={'class': 'form-control'}),
             'cor_principal': forms.Select(attrs={'class': 'form-control'}),
             'tecido': forms.Select(attrs={'class': 'form-control'}),
             'tamanho_etiqueta': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: 38, P, M...'}),
             'genero': forms.Select(attrs={'class': 'form-control'}),
-            'marca_estilista': forms.TextInput(attrs={'class': 'form-control'}),
+            'marca_estilista': forms.TextInput(attrs={'class': 'form-control', 'autocomplete': 'off'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
             'conservacao': forms.Select(attrs={'class': 'form-control'}),
+            'total_locacoes': forms.NumberInput(attrs={'class': 'form-control', 'step': '0'}),
             'preco_aluguel_padrao': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'preco_custo': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'multa_atraso_diaria': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'observacao': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'observacao': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'autocomplete': 'off'}),
             'ativo': forms.CheckboxInput(attrs={
                 'class': 'w-5 h-5 rounded border-stone-300 text-[#B4977A] focus:ring-[#B4977A]'
             }),
