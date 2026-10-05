@@ -27,12 +27,10 @@ MODULOS = [
     ]),
     ("Locações", [
         ("Locações", "locacoes", "locacao"),
-        # Usa a permissão "ver" que o Django já cria para ItemLocacao (não precisa de migração)
         ("Consulta de disponibilidade", "locacoes", "itemlocacao"),
     ]),
 ]
 
-# Módulos em que só algumas ações fazem sentido (as demais ficam em branco na tabela)
 ACOES_RESTRITAS = {
     ("locacoes", "itemlocacao"): ["view"],
 }
@@ -42,11 +40,8 @@ def acoes_do_modulo(app, model):
     return ACOES_RESTRITAS.get((app, model), [acao for acao, _nome in ACOES])
 
 
-# Quem tiver QUALQUER uma destas permissões acessa a consulta/verificação de disponibilidade.
-# (quem já tem acesso a Locações continua podendo usar, pois o formulário de locação depende dela)
 PERMISSOES_DISPONIBILIDADE = ("locacoes.view_itemlocacao", "locacoes.view_locacao")
 
-# Palavra encontrada no nome da URL -> (app, model)
 ALVOS = {
     "categoria": ("estoque", "categoria"),
     "categorias": ("estoque", "categoria"),
@@ -65,8 +60,6 @@ ALVOS = {
     "locacoes": ("locacoes", "locacao"),
 }
 
-# Primeira palavra do nome da URL -> ação exigida.
-# Prefixo desconhecido exige "change" (o mais seguro).
 PREFIXOS = {
     "lista": "view", "listar": "view", "consulta": "view", "consultar": "view",
     "buscar": "view", "busca": "view", "checar": "view", "verificar": "view",
@@ -77,6 +70,7 @@ PREFIXOS = {
     "excluir": "delete", "deletar": "delete", "remover": "delete", "apagar": "delete",
 }
 
-# Exceções manuais: nome_da_url -> "app.acao_model" (ou várias, basta uma; ou SOMENTE_ADMIN)
-# Exemplo: "buscar_clientes_locacao": "locacoes.add_locacao",
-PERMISSOES_POR_URL = {}
+PERMISSOES_POR_URL = {
+    "autocomplete_produtos": PERMISSOES_DISPONIBILIDADE,
+    "verificar_disponibilidade": PERMISSOES_DISPONIBILIDADE,
+}

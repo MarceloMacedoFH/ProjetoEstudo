@@ -48,6 +48,13 @@
                 {{ form.password2 }}
                 {% for erro in form.password2.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
             </div>
+
+            <!-- Campo Grupo / Perfil de Acesso -->
+            <div class="md:col-span-2">
+                <label for="{{ form.grupo.id_for_label }}" class="block text-[12px] uppercase tracking-widest text-stone-600 font-bold mb-2">{{ form.grupo.label }}</label>
+                {{ form.grupo }}
+                {% for erro in form.grupo.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
+            </div>
         </div>
 
         <div class="flex flex-wrap gap-8 text-sm text-stone-700">
@@ -57,45 +64,6 @@
             <label class="flex items-center gap-3">
                 {{ form.is_superuser }} {{ form.is_superuser.label }}
             </label>
-        </div>
-
-        <div id="matriz-permissoes" class="space-y-6 transition-opacity">
-            <div>
-                <h2 class="brand-font text-2xl text-stone-800">Permissões de acesso</h2>
-                <p class="text-stone-500 text-sm font-light mt-1">
-                    Marque o que este usuário pode fazer em cada módulo. Criar, editar e excluir já liberam também o "Ver".
-                    Administradores têm acesso total e ignoram esta tabela.
-                </p>
-            </div>
-
-            {% for grupo in grupos %}
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-stone-700">
-                    <thead>
-                        <tr class="text-left text-[12px] uppercase tracking-widest text-stone-500 border-b border-stone-200">
-                            <th class="py-3 pr-4">{{ grupo.nome }}</th>
-                            {% for acao in acoes %}
-                            <th class="py-3 px-4 text-center">{{ acao.1 }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for linha in grupo.linhas %}
-                        <tr data-linha class="border-b border-stone-100">
-                            <td class="py-3 pr-4">{{ linha.nome }}</td>
-                            {% for c in linha.celulas %}
-                            <td class="py-3 px-4 text-center">
-                                {% if c.codigo %}
-                                <input type="checkbox" name="perms" value="{{ c.codigo }}" class="perm-{{ c.acao }}" {% if c.marcada %}checked{% endif %}>
-                                {% endif %}
-                            </td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% endfor %}
         </div>
 
         <div class="flex items-center gap-4">
@@ -108,26 +76,4 @@
         </div>
     </form>
 </div>
-
-<script>
-    document.querySelectorAll('tr[data-linha]').forEach(function (tr) {
-        const ver = tr.querySelector('.perm-view');
-        const outras = tr.querySelectorAll('.perm-add, .perm-change, .perm-delete');
-        outras.forEach(function (c) {
-            c.addEventListener('change', function () { if (c.checked) ver.checked = true; });
-        });
-        ver.addEventListener('change', function () {
-            if (!ver.checked) outras.forEach(function (c) { c.checked = false; });
-        });
-    });
-
-    const admin = document.getElementById('{{ form.is_superuser.id_for_label }}');
-    const matriz = document.getElementById('matriz-permissoes');
-    function atualizarMatriz() {
-        matriz.classList.toggle('opacity-40', admin.checked);
-        matriz.classList.toggle('pointer-events-none', admin.checked);
-    }
-    admin.addEventListener('change', atualizarMatriz);
-    atualizarMatriz();
-</script>
 {% endblock %}

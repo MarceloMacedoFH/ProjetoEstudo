@@ -1,12 +1,12 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.views import LoginView
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from .forms import LoginForm, UsuarioForm
+from .forms import GrupoForm, LoginForm, UsuarioForm
 from .modulos import ACOES, MODULOS, acoes_do_modulo
 
 User = get_user_model()
@@ -47,17 +47,16 @@ def _montar_matriz(marcadas):
     return grupos
 
 
-def _permissoes_do_usuario(usuario):
+def _permissoes_do_grupo(grupo):
     return {
         f"{p.content_type.app_label}.{p.codename}"
-        for p in usuario.user_permissions.select_related("content_type")
+        for p in grupo.permissions.select_related("content_type")
     }
 
 
-def _aplicar_permissoes(usuario, selecionadas):
+def _aplicar_permissoes_grupo(grupo, selecionadas):
     escolhidas = set(selecionadas) & _permissoes_validas()
 
-    # criar/editar/excluir sempre implicam poder ver
     for codigo in list(escolhidas):
         app, cod = codigo.split(".", 1)
         _acao, model = cod.split("_", 1)
@@ -67,24 +66,76 @@ def _aplicar_permissoes(usuario, selecionadas):
     for codigo in escolhidas:
         app, cod = codigo.split(".", 1)
         permissoes.append(Permission.objects.get(content_type__app_label=app, codename=cod))
-    usuario.user_permissions.set(permissoes)
+    grupo.permissions.set(permissoes)
 
 
-def _contexto_form(form, marcadas, editando, usuario=None):
+def _contexto_form_grupo(form, marcadas, editando, grupo=None):
     return {
         "form": form,
         "grupos": _montar_matriz(marcadas),
         "acoes": ACOES,
         "editando": editando,
-        "usuario_edicao": usuario,
+        "grupo_edicao": grupo,
     }
 
 
-# ---------- telas de gestão de usuários (somente administrador) ----------
+# ---------- gestão de grupos (somente administrador) ----------
+
+def lista_grupos(request):
+    query = request.GET.get("q", "").strip()
+    grupos = Group.objects.all().order_by("name")
+    if query:
+        grupos = grupos.filter(name__icontains=query)
+    return render(request, "usuarios/lista_grupos.html", {"grupos": grupos, "query": query})
+
+
+def criar_grupo(request):
+    form = GrupoForm(request.POST or None)
+    marcadas = set(request.POST.getlist("perms"))
+
+    if request.method == "POST" and form.is_valid():
+        grupo = form.save()
+        _aplicar_permissoes_grupo(grupo, marcadas)
+        messages.success(request, "Grupo de acesso criado com sucesso.")
+        return redirect("lista_grupos")
+
+    return render(request, "usuarios/form_grupo.html", _contexto_form_grupo(form, marcadas, False))
+
+
+def editar_grupo(request, pk):
+    grupo = get_object_or_404(Group, pk=pk)
+    form = GrupoForm(request.POST or None, instance=grupo)
+
+    if request.method == "POST":
+        marcadas = set(request.POST.getlist("perms"))
+    else:
+        marcadas = _permissoes_do_grupo(grupo)
+
+    if request.method == "POST" and form.is_valid():
+        grupo = form.save()
+        _aplicar_permissoes_grupo(grupo, marcadas)
+        messages.success(request, "Grupo de acesso atualizado com sucesso.")
+        return redirect("lista_grupos")
+
+    return render(
+        request, "usuarios/form_grupo.html", _contexto_form_grupo(form, marcadas, True, grupo)
+    )
+
+
+@require_POST
+def excluir_grupo(request, pk):
+    grupo = get_object_or_404(Group, pk=pk)
+    nome = grupo.name
+    grupo.delete()
+    messages.success(request, f"Grupo '{nome}' excluído com sucesso.")
+    return redirect("lista_grupos")
+
+
+# ---------- gestão de usuários (somente administrador) ----------
 
 def lista_usuarios(request):
     query = request.GET.get("q", "").strip()
-    usuarios = User.objects.all().order_by("username")
+    usuarios = User.objects.prefetch_related("groups").exclude(username="admin").order_by("username")
     if query:
         usuarios = usuarios.filter(
             Q(username__icontains=query)
@@ -96,34 +147,31 @@ def lista_usuarios(request):
 
 def criar_usuario(request):
     form = UsuarioForm(request.POST or None)
-    marcadas = set(request.POST.getlist("perms"))
 
     if request.method == "POST" and form.is_valid():
         usuario = form.save(commit=False)
         usuario.set_password(form.cleaned_data["password1"])
         usuario.save()
-        if not usuario.is_superuser:
-            _aplicar_permissoes(usuario, marcadas)
+
+        grupo = form.cleaned_data.get("grupo")
+        if grupo:
+            usuario.groups.set([grupo])
+
         messages.success(request, "Usuário cadastrado com sucesso.")
         return redirect("lista_usuarios")
 
-    return render(request, "usuarios/form_usuario.html", _contexto_form(form, marcadas, False))
+    return render(request, "usuarios/form_usuario.html", {"form": form, "editando": False})
 
 
 def editar_usuario(request, pk):
     usuario = get_object_or_404(User, pk=pk)
     form = UsuarioForm(request.POST or None, instance=usuario)
 
-    if request.method == "POST":
-        marcadas = set(request.POST.getlist("perms"))
-    else:
-        marcadas = _permissoes_do_usuario(usuario)
-
     if request.method == "POST" and form.is_valid():
         editando_a_si_mesmo = usuario.pk == request.user.pk
         usuario = form.save(commit=False)
+
         if editando_a_si_mesmo:
-            # evita o administrador se trancar para fora do sistema
             usuario.is_active = True
             usuario.is_superuser = True
 
@@ -132,10 +180,11 @@ def editar_usuario(request, pk):
             usuario.set_password(senha)
         usuario.save()
 
-        if usuario.is_superuser:
-            usuario.user_permissions.clear()
+        grupo = form.cleaned_data.get("grupo")
+        if grupo:
+            usuario.groups.set([grupo])
         else:
-            _aplicar_permissoes(usuario, marcadas)
+            usuario.groups.clear()
 
         if senha and editando_a_si_mesmo:
             update_session_auth_hash(request, usuario)
@@ -144,7 +193,7 @@ def editar_usuario(request, pk):
         return redirect("lista_usuarios")
 
     return render(
-        request, "usuarios/form_usuario.html", _contexto_form(form, marcadas, True, usuario)
+        request, "usuarios/form_usuario.html", {"form": form, "editando": True, "usuario_edicao": usuario}
     )
 
 

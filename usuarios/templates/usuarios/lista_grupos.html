@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Grupos de Acesso | Center Noivas{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="brand-font text-3xl text-stone-800">Grupos de Acesso</h1>
+            <p class="text-stone-500 text-sm">Gerencie os perfis e matriz de permissões do sistema</p>
+        </div>
+        <a href="{% url 'criar_grupo' %}" class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-stone-800 text-white text-xs uppercase tracking-widest font-semibold hover:bg-stone-700 transition-colors shadow-sm">
+            + Novo Grupo
+        </a>
+    </div>
+
+    <!-- Filtro -->
+    <form method="get" class="flex gap-3">
+        <input type="text" name="q" value="{{ query }}" placeholder="Buscar por nome do grupo..." class="w-full max-w-md px-4 py-2.5 rounded-xl border border-stone-300 bg-white/70 text-sm focus:outline-none focus:border-stone-500">
+        <button type="submit" class="px-5 py-2.5 rounded-xl bg-stone-200 text-stone-700 text-xs font-semibold hover:bg-stone-300 transition-colors">
+            Filtrar
+        </button>
+    </form>
+
+    <!-- Tabela -->
+    <div class="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="border-b border-stone-200 bg-stone-50/50 text-[11px] uppercase tracking-wider text-stone-500 font-semibold">
+                    <th class="py-4 px-6">Nome do Grupo</th>
+                    <th class="py-4 px-6">Usuários Vinculados</th>
+                    <th class="py-4 px-6 text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-stone-100 text-sm text-stone-700">
+                {% for grupo in grupos %}
+                <tr class="hover:bg-stone-50/50 transition-colors">
+                    <td class="py-4 px-6 font-semibold text-stone-800">{{ grupo.name }}</td>
+                    <td class="py-4 px-6">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-stone-100 text-stone-700">
+                            {{ grupo.user_set.count }} usuário(s)
+                        </span>
+                    </td>
+                    <td class="py-4 px-6 text-right space-x-2">
+                        <a href="{% url 'editar_grupo' grupo.pk %}" class="inline-block px-3 py-1.5 rounded-lg border border-stone-300 text-xs font-semibold text-stone-600 hover:bg-stone-100 transition-colors">
+                            Editar Permissões
+                        </a>
+                        <form method="post" action="{% url 'excluir_grupo' grupo.pk %}" class="inline-block" onsubmit="return confirm('Tem certeza que deseja excluir o grupo {{ grupo.name }}?');">
+                            {% csrf_token %}
+                            <button type="submit" class="px-3 py-1.5 rounded-lg border border-red-200 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors">
+                                Excluir
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="py-8 text-center text-stone-500 font-light">
+                        Nenhum grupo de acesso encontrado.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
