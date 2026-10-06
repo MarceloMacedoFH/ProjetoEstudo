@@ -11,7 +11,7 @@ urlpatterns = [
     path("usuarios/", views.lista_usuarios, name="lista_usuarios"),
     path("usuarios/novo/", views.criar_usuario, name="criar_usuario"),
     path("usuarios/<int:pk>/editar/", views.editar_usuario, name="editar_usuario"),
-    path("usuarios/<int:pk>/alternar/", views.alternar_usuario, name="alternar_usuario"),
+    path("usuarios/<int:pk>/excluir/", views.excluir_usuario, name="excluir_usuario"),
     
     # Gestão de Grupos / Perfis
     path("grupos/", views.lista_grupos, name="lista_grupos"),

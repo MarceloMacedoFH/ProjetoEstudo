@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model, update_session_auth_hash
 from django.contrib.auth.models import Group, Permission
 from django.contrib.auth.views import LoginView
-from django.db.models import Q
+from django.db.models import Q, ProtectedError, RestrictedError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
@@ -197,14 +197,24 @@ def editar_usuario(request, pk):
     )
 
 
-@require_POST
-def alternar_usuario(request, pk):
+def excluir_usuario(request, pk):
     usuario = get_object_or_404(User, pk=pk)
-    if usuario.pk == request.user.pk:
-        messages.error(request, "Você não pode desativar o seu próprio usuário.")
+
+    if request.method == "POST":
+        if usuario.pk == request.user.pk:
+            messages.error(request, "Você não pode excluir o seu próprio usuário.")
+            return redirect("lista_usuarios")
+
+        if usuario.is_superuser and not User.objects.filter(is_superuser=True).exclude(pk=usuario.pk).exists():
+            messages.error(request, "Não é possível excluir o único administrador do sistema.")
+            return redirect("lista_usuarios")
+
+        try:
+            nome = usuario.username
+            usuario.delete()
+            messages.success(request, f"Usuário {nome} excluído com sucesso.")
+        except (ProtectedError, RestrictedError):
+            messages.error(request, "Este usuário possui registros vinculados e não pode ser excluído. Desmarque 'Usuário ativo' para bloqueá-lo.")
+        return redirect("lista_usuarios")
     else:
-        usuario.is_active = not usuario.is_active
-        usuario.save(update_fields=["is_active"])
-        situacao = "ativado" if usuario.is_active else "desativado"
-        messages.success(request, f"Usuário {situacao} com sucesso.")
-    return redirect("lista_usuarios")
+        return render(request, 'usuarios/confirmar_exclusao.html', {'usuario': usuario})

@@ -4,74 +4,97 @@
 
 {% block content %}
 <div class="premium-card p-10">
+    <!-- Cabeçalho da Listagem -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
+        <div>
+            <h1 class="brand-font text-4xl text-stone-800 mb-2">Gestão de Usuários</h1>
+            <p class="text-stone-600 font-normal tracking-wide italic">Visualize e gerencie quem tem acesso ao sistema</p>
+        </div>
 
-    <div class="flex items-center justify-between mb-8">
-        <h1 class="brand-font text-3xl text-stone-800">Usuários</h1>
-        <a href="{% url 'criar_usuario' %}" class="px-6 py-3 rounded-xl bg-stone-800 text-white text-xs tracking-widest uppercase font-semibold hover:bg-stone-700 transition-colors">
-            Novo usuário
-        </a>
+        <div class="flex flex-col md:flex-row items-center gap-4">
+            <form method="GET" action="{% url 'lista_usuarios' %}" class="relative group">
+                <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Buscar por usuário ou nome..."
+                    class="pl-11 pr-4 py-3 bg-white border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#B4977A]/20 focus:border-[#B4977A] transition-all w-full md:w-64 lg:w-80 shadow-sm">
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-[#B4977A] transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </form>
+
+            <a href="{% url 'criar_usuario' %}" class="inline-flex items-center px-6 py-3 bg-[#B4977A] text-white font-semibold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20 group shrink-0">
+                <svg class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Novo Usuário
+            </a>
+        </div>
     </div>
 
     {% if messages %}
         {% for message in messages %}
-        <div class="mb-4 px-4 py-3 rounded-xl text-sm border {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-700{% else %}bg-emerald-50 border-emerald-200 text-emerald-700{% endif %}">
+        <div class="mb-4 p-4 rounded-2xl border {% if message.tags == 'error' %}bg-rose-50 border-rose-100 text-rose-700{% else %}bg-emerald-50 border-emerald-100 text-emerald-700{% endif %} shadow-sm">
             {{ message }}
         </div>
         {% endfor %}
     {% endif %}
 
-    <form method="get" class="mb-6 flex gap-3">
-        <input type="text" name="q" value="{{ query }}" placeholder="Buscar por usuário ou nome..."
-               class="flex-1 px-4 py-3 rounded-xl border border-stone-300 bg-white/70 text-sm focus:outline-none focus:border-stone-500">
-        <button type="submit" class="px-6 py-3 rounded-xl border border-stone-300 text-xs tracking-widest uppercase font-semibold text-stone-700 hover:bg-stone-100 transition-colors">
-            Buscar
-        </button>
-    </form>
-
-    <div class="overflow-x-auto">
-        <table class="w-full text-sm text-stone-700">
+    <!-- Container da Tabela Elegante -->
+    <div class="overflow-x-auto rounded-[2rem] border border-stone-100 bg-white/40 backdrop-blur-sm">
+        <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="text-left text-[12px] uppercase tracking-widest text-stone-500 border-b border-stone-200">
-                    <th class="py-3 pr-4">Usuário</th>
-                    <th class="py-3 pr-4">Nome</th>
-                    <th class="py-3 pr-4">Perfil</th>
-                    <th class="py-3 pr-4">Situação</th>
-                    <th class="py-3 text-right">Ações</th>
+                <tr class="text-[12px] uppercase tracking-[0.2em] text-stone-600 font-bold">
+                    <th class="px-6 py-5">Usuário</th>
+                    <th class="px-6 py-5">Nome</th>
+                    <th class="px-6 py-5">Sobrenome</th>
+                    <th class="px-6 py-5">Grupo</th>
+                    <th class="px-6 py-5">Situação</th>
+                    <th class="px-6 py-5 text-right">Ações</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-stone-50">
                 {% for u in usuarios %}
-                <tr class="border-b border-stone-100">
-                    <td class="py-3 pr-4 font-semibold">{{ u.username }}</td>
-                    <td class="py-3 pr-4">{{ u.get_full_name|default:"-" }}</td>
-                    <td class="py-3 pr-4">{% if u.is_superuser %}Administrador{% else %}Usuário{% endif %}</td>
-                    <td class="py-3 pr-4">
+                <tr class="hover:bg-white/60 transition-colors group">
+                    <td class="px-6 py-5">
+                        <span class="font-mono text-xm text-[#B4977A] font-bold">{{ u.username }}</span>
+                    </td>
+                    <td class="px-6 py-5 font-semibold text-stone-800">
+                        {{ u.first_name}}
+                    </td>
+                    <td class="px-6 py-5 font-semibold text-stone-800">
+                        {{ u.last_name}}
+                    </td>
+                    <td class="px-6 py-5 text-sm text-stone-600 italic">
+                        {% for g in u.groups.all %}{{ g.name }}{% if not forloop.last %}, {% endif %}{% empty %}-{% endfor %}
+                    </td>
+                    <td class="px-6 py-5">
                         {% if u.is_active %}
-                        <span class="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs">Ativo</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase">Ativo</span>
                         {% else %}
-                        <span class="px-3 py-1 rounded-full bg-stone-100 text-stone-500 text-xs">Inativo</span>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-stone-100 text-stone-500 text-[10px] font-bold uppercase">Inativo</span>
                         {% endif %}
                     </td>
-                    <td class="py-3 text-right whitespace-nowrap">
-                        <a href="{% url 'editar_usuario' u.pk %}" class="text-stone-700 hover:underline mr-4">Editar</a>
-                        {% if u.pk != request.user.pk %}
-                        <form method="post" action="{% url 'alternar_usuario' u.pk %}" class="inline">
-                            {% csrf_token %}
-                            <button type="submit" class="text-stone-500 hover:underline">
-                                {% if u.is_active %}Desativar{% else %}Ativar{% endif %}
-                            </button>
-                        </form>
-                        {% endif %}
+                    <td class="px-6 py-5 text-center">
+                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="{% url 'editar_usuario' u.pk %}" class="p-2 text-stone-400 hover:text-[#B4977A] transition-colors" title="Editar">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="py-8 text-center text-stone-500">Nenhum usuário encontrado.</td>
+                    <td colspan="5" class="px-6 py-20 text-center">
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-10 h-10 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-4.13a4 4 0 100-8 4 4 0 000 8zm6 2a3 3 0 100-6M3 8a3 3 0 106 0"></path></svg>
+                            </div>
+                            <h3 class="text-stone-500 font-medium">Nenhum usuário encontrado</h3>
+                            <p class="text-stone-400 text-sm italic mt-1">Clique em "Novo Usuário" para cadastrar o primeiro acesso.</p>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-
 </div>
 {% endblock %}

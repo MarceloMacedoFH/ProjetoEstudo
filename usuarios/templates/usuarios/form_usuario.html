@@ -1,79 +1,122 @@
 {% extends 'base.html' %}
 
-{% block title %}{% if editando %}Editar usuário{% else %}Novo usuário{% endif %} - Center Noivas{% endblock %}
+{% block title %}{% if editando %}Editar Usuário{% else %}Novo Usuário{% endif %} - Center Noivas{% endblock %}
 
 {% block content %}
-<div class="premium-card p-10">
+<div class="max-w-4xl mx-auto">
+    <div class="premium-card p-10">
+        <!-- Cabeçalho e Exibição de Erros / Mensagens -->
+        <div class="mb-10 text-center">
+            {% if form.errors or messages %}
+            <div class="mb-8 text-left">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-4 rounded-2xl border {% if message.tags == 'error' %}bg-rose-50 border-rose-100 text-rose-700{% else %}bg-emerald-50 border-emerald-100 text-emerald-700{% endif %} shadow-sm">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
 
-    <h1 class="brand-font text-3xl text-stone-800 mb-8">
-        {% if editando %}Editar usuário{% else %}Novo usuário{% endif %}
-    </h1>
-
-    <form method="post" class="space-y-8">
-        {% csrf_token %}
-
-        {% if form.non_field_errors %}
-        <div class="px-4 py-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
-            {{ form.non_field_errors.0 }}
-        </div>
-        {% endif %}
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <label for="{{ form.username.id_for_label }}" class="block text-[12px] uppercase tracking-widest text-stone-600 font-bold mb-2">{{ form.username.label }}</label>
-                {{ form.username }}
-                {% for erro in form.username.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
+                {% if form.errors %}
+                    <div class="p-6 bg-rose-50 border border-rose-100 rounded-2xl shadow-sm">
+                        <div class="flex items-center gap-3 mb-4 text-rose-800">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <h3 class="font-bold uppercase tracking-widest text-[15px]">Por favor, corrija os erros abaixo:</h3>
+                        </div>
+                        <ul class="space-y-1">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li class="text-sm text-rose-600 flex items-start gap-2">
+                                        <span class="font-semibold whitespace-nowrap">{{ field.label }}:</span>
+                                        <span>{{ error }}</span>
+                                    </li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li class="text-sm text-rose-600">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
-            <div></div>
+            {% endif %}
 
-            <div>
-                <label for="{{ form.first_name.id_for_label }}" class="block text-[12px] uppercase tracking-widest text-stone-600 font-bold mb-2">{{ form.first_name.label }}</label>
-                {{ form.first_name }}
-                {% for erro in form.first_name.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
-            </div>
-            <div>
-                <label for="{{ form.last_name.id_for_label }}" class="block text-[12px] uppercase tracking-widest text-stone-600 font-bold mb-2">{{ form.last_name.label }}</label>
-                {{ form.last_name }}
-                {% for erro in form.last_name.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
-            </div>
-
-            <div>
-                <label for="{{ form.password1.id_for_label }}" class="block text-[12px] uppercase tracking-widest text-stone-600 font-bold mb-2">{{ form.password1.label }}</label>
-                {{ form.password1 }}
-                {% if editando %}<p class="text-stone-500 text-xs mt-1">Deixe em branco para manter a senha atual.</p>{% endif %}
-                {% for erro in form.password1.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
-            </div>
-            <div>
-                <label for="{{ form.password2.id_for_label }}" class="block text-[12px] uppercase tracking-widest text-stone-600 font-bold mb-2">{{ form.password2.label }}</label>
-                {{ form.password2 }}
-                {% for erro in form.password2.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
-            </div>
-
-            <!-- Campo Grupo / Perfil de Acesso -->
-            <div class="md:col-span-2">
-                <label for="{{ form.grupo.id_for_label }}" class="block text-[12px] uppercase tracking-widest text-stone-600 font-bold mb-2">{{ form.grupo.label }}</label>
-                {{ form.grupo }}
-                {% for erro in form.grupo.errors %}<p class="text-red-600 text-xs mt-1">{{ erro }}</p>{% endfor %}
-            </div>
+            <h1 class="brand-font text-4xl text-stone-800 mb-2">{% if editando %}Editar Usuário{% else %}Novo Usuário{% endif %}</h1>
+            <p class="text-stone-600 italic">Informe os dados de acesso e o perfil do usuário</p>
         </div>
 
-        <div class="flex flex-wrap gap-8 text-sm text-stone-700">
-            <label class="flex items-center gap-3">
-                {{ form.is_active }} {{ form.is_active.label }}
-            </label>
-            <label class="flex items-center gap-3">
-                {{ form.is_superuser }} {{ form.is_superuser.label }}
-            </label>
-        </div>
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
 
-        <div class="flex items-center gap-4">
-            <button type="submit" class="px-8 py-3 rounded-xl bg-stone-800 text-white text-xs tracking-widest uppercase font-semibold hover:bg-stone-700 transition-colors">
-                Salvar
-            </button>
-            <a href="{% url 'lista_usuarios' %}" class="px-8 py-3 rounded-xl border border-stone-300 text-xs tracking-widest uppercase font-semibold text-stone-700 hover:bg-stone-100 transition-colors">
-                Cancelar
-            </a>
-        </div>
-    </form>
+            <!-- Seção 1: Identificação -->
+            <div>
+                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-6 border-b border-stone-100 pb-2">Identificação</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label for="{{ form.username.id_for_label }}" class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">{{ form.username.label }}</label>
+                        {{ form.username }}
+                    </div>
+                    <div>
+                        <label for="{{ form.first_name.id_for_label }}" class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">{{ form.first_name.label }}</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div>
+                        <label for="{{ form.last_name.id_for_label }}" class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">{{ form.last_name.label }}</label>
+                        {{ form.last_name }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção 2: Senha -->
+            <div>
+                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-6 border-b border-stone-100 pb-2">Senha</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="{{ form.password1.id_for_label }}" class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">{{ form.password1.label }}</label>
+                        {{ form.password1 }}
+                        {% if editando %}<p class="text-stone-500 text-xs italic mt-2">Deixe em branco para manter a senha atual.</p>{% endif %}
+                    </div>
+                    <div>
+                        <label for="{{ form.password2.id_for_label }}" class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">{{ form.password2.label }}</label>
+                        {{ form.password2 }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Seção 3: Perfil de Acesso -->
+            <div class="space-y-4">
+                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold border-b border-stone-100 pb-2">Perfil de Acesso</h2>
+                <div>
+                    <label for="{{ form.grupo.id_for_label }}" class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">{{ form.grupo.label }}</label>
+                    {{ form.grupo }}
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="flex items-center gap-3 p-4 bg-stone-50 rounded-xl text-sm text-stone-700 font-medium">
+                        {{ form.is_active }} <span>{{ form.is_active.label }}</span>
+                    </label>
+                    <label class="flex items-center gap-3 p-4 bg-stone-50 rounded-xl text-sm text-stone-700 font-medium">
+                        {{ form.is_superuser }} <span>{{ form.is_superuser.label }}</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Ações -->
+            <div class="flex items-center justify-between gap-4 pt-6 border-t border-stone-100">
+                <div>
+                    {% if editando and form.instance.pk != request.user.pk %}
+                    <div class="flex-1">
+                        <a href="{% url 'excluir_usuario' form.instance.pk %}" class="text-[11px] uppercase tracking-widest text-red-500 hover:text-red-700 font-bold transition-colors">Excluir usuário</a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="{% url 'lista_usuarios' %}" class="text-stone-400 hover:text-stone-600 font-medium transition-colors">Cancelar</a>
+                    <button type="submit" class="px-10 py-4 bg-[#B4977A] text-white font-bold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20">
+                        Salvar Usuário
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

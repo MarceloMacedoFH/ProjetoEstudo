@@ -1,62 +1,87 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}Grupos de Acesso | Center Noivas{% endblock %}
+{% block title %}Grupos de Acesso - Center Noivas{% endblock %}
 
 {% block content %}
-<div class="space-y-6">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="premium-card p-10">
+    <!-- Cabeçalho da Listagem -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-4">
         <div>
-            <h1 class="brand-font text-3xl text-stone-800">Grupos de Acesso</h1>
-            <p class="text-stone-500 text-sm">Gerencie os perfis e matriz de permissões do sistema</p>
+            <h1 class="brand-font text-4xl text-stone-800 mb-2">Grupos de Acesso</h1>
+            <p class="text-stone-600 font-normal tracking-wide italic">Gerencie os perfis e a matriz de permissões do sistema</p>
         </div>
-        <a href="{% url 'criar_grupo' %}" class="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-stone-800 text-white text-xs uppercase tracking-widest font-semibold hover:bg-stone-700 transition-colors shadow-sm">
-            + Novo Grupo
-        </a>
+
+        <div class="flex flex-col md:flex-row items-center gap-4">
+            <form method="GET" action="{% url 'lista_grupos' %}" class="relative group">
+                <input type="text" name="q" value="{{ query|default:'' }}" placeholder="Buscar por nome do grupo..."
+                    class="pl-11 pr-4 py-3 bg-white border border-stone-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-[#B4977A]/20 focus:border-[#B4977A] transition-all w-full md:w-64 lg:w-80 shadow-sm">
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 group-focus-within:text-[#B4977A] transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+            </form>
+
+            <a href="{% url 'criar_grupo' %}" class="inline-flex items-center px-6 py-3 bg-[#B4977A] text-white font-semibold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20 group shrink-0">
+                <svg class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Novo Grupo
+            </a>
+        </div>
     </div>
 
-    <!-- Filtro -->
-    <form method="get" class="flex gap-3">
-        <input type="text" name="q" value="{{ query }}" placeholder="Buscar por nome do grupo..." class="w-full max-w-md px-4 py-2.5 rounded-xl border border-stone-300 bg-white/70 text-sm focus:outline-none focus:border-stone-500">
-        <button type="submit" class="px-5 py-2.5 rounded-xl bg-stone-200 text-stone-700 text-xs font-semibold hover:bg-stone-300 transition-colors">
-            Filtrar
-        </button>
-    </form>
+    {% if messages %}
+        {% for message in messages %}
+        <div class="mb-4 p-4 rounded-2xl border {% if message.tags == 'error' %}bg-rose-50 border-rose-100 text-rose-700{% else %}bg-emerald-50 border-emerald-100 text-emerald-700{% endif %} shadow-sm">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
 
-    <!-- Tabela -->
-    <div class="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
+    <!-- Container da Tabela Elegante -->
+    <div class="overflow-x-auto rounded-[2rem] border border-stone-100 bg-white/40 backdrop-blur-sm">
         <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="border-b border-stone-200 bg-stone-50/50 text-[11px] uppercase tracking-wider text-stone-500 font-semibold">
-                    <th class="py-4 px-6">Nome do Grupo</th>
-                    <th class="py-4 px-6">Usuários Vinculados</th>
-                    <th class="py-4 px-6 text-right">Ações</th>
+                <tr class="text-[12px] uppercase tracking-[0.2em] text-stone-600 font-bold">
+                    <th class="px-6 py-5">Nome do Grupo</th>
+                    <th class="px-6 py-5">Usuários Vinculados</th>
+                    <th class="px-6 py-5 text-right">Ações</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-stone-100 text-sm text-stone-700">
+            <tbody class="divide-y divide-stone-50">
                 {% for grupo in grupos %}
-                <tr class="hover:bg-stone-50/50 transition-colors">
-                    <td class="py-4 px-6 font-semibold text-stone-800">{{ grupo.name }}</td>
-                    <td class="py-4 px-6">
-                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-stone-100 text-stone-700">
+                <tr class="hover:bg-white/60 transition-colors group">
+                    <td class="px-6 py-5 font-semibold text-stone-800">
+                        {{ grupo.name }}
+                    </td>
+                    <td class="px-6 py-5">
+                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-stone-100 text-[#B4977A] text-[10px] font-bold uppercase">
                             {{ grupo.user_set.count }} usuário(s)
                         </span>
                     </td>
-                    <td class="py-4 px-6 text-right space-x-2">
-                        <a href="{% url 'editar_grupo' grupo.pk %}" class="inline-block px-3 py-1.5 rounded-lg border border-stone-300 text-xs font-semibold text-stone-600 hover:bg-stone-100 transition-colors">
-                            Editar Permissões
-                        </a>
-                        <form method="post" action="{% url 'excluir_grupo' grupo.pk %}" class="inline-block" onsubmit="return confirm('Tem certeza que deseja excluir o grupo {{ grupo.name }}?');">
-                            {% csrf_token %}
-                            <button type="submit" class="px-3 py-1.5 rounded-lg border border-red-200 text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors">
-                                Excluir
-                            </button>
-                        </form>
+                    <td class="px-6 py-5 text-right">
+                        <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <a href="{% url 'editar_grupo' grupo.pk %}" class="px-3 py-1.5 text-[10px] uppercase tracking-wider font-bold text-stone-400 hover:text-[#B4977A] transition-colors" title="Editar permissões">
+                                Editar Permissões
+                            </a>
+                            <form method="post" action="{% url 'excluir_grupo' grupo.pk %}" class="inline-block" onsubmit="return confirm('Tem certeza que deseja excluir o grupo {{ grupo.name }}?');">
+                                {% csrf_token %}
+                                <button type="submit" class="p-2 text-stone-400 hover:text-rose-600 transition-colors" title="Excluir">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="3" class="py-8 text-center text-stone-500 font-light">
-                        Nenhum grupo de acesso encontrado.
+                    <td colspan="3" class="px-6 py-20 text-center">
+                        <div class="flex flex-col items-center">
+                            <div class="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mb-4">
+                                <svg class="w-10 h-10 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            </div>
+                            <h3 class="text-stone-500 font-medium">Nenhum grupo de acesso encontrado</h3>
+                            <p class="text-stone-400 text-sm italic mt-1">Clique em "Novo Grupo" para criar o primeiro perfil.</p>
+                        </div>
                     </td>
                 </tr>
                 {% endfor %}

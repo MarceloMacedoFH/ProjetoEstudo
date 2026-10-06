@@ -1,92 +1,117 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}{% if editando %}Editar Grupo{% else %}Novo Grupo{% endif %} | Center Noivas{% endblock %}
+{% block title %}{% if editando %}Editar Grupo{% else %}Novo Grupo{% endif %} - Center Noivas{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-8">
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="brand-font text-3xl text-stone-800">
-                {% if editando %}Editar Grupo: {{ grupo_edicao.name }}{% else %}Cadastrar Novo Grupo{% endif %}
-            </h1>
-            <p class="text-stone-500 text-sm">Defina o nome do grupo e marque as permissões concedidas a este perfil</p>
-        </div>
-        <a href="{% url 'lista_grupos' %}" class="text-xs uppercase tracking-widest font-semibold text-stone-500 hover:text-stone-800 transition-colors">
-            &larr; Voltar
-        </a>
-    </div>
+<div class="max-w-4xl mx-auto">
+    <div class="premium-card p-10">
+        <!-- Cabeçalho e Exibição de Erros / Mensagens -->
+        <div class="mb-10 text-center">
+            {% if form.errors or messages %}
+            <div class="mb-8 text-left">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="mb-4 p-4 rounded-2xl border {% if message.tags == 'error' %}bg-rose-50 border-rose-100 text-rose-700{% else %}bg-emerald-50 border-emerald-100 text-emerald-700{% endif %} shadow-sm">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
 
-    <form method="post" class="space-y-8">
-        {% csrf_token %}
-
-        <div class="bg-white rounded-2xl p-6 border border-stone-200/80 shadow-sm space-y-4">
-            <h2 class="text-sm uppercase tracking-wider font-semibold text-stone-700">Informações Básicas</h2>
-            <div>
-                <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-1">Nome do Grupo</label>
-                {{ form.name }}
-                {% if form.name.errors %}
-                <p class="text-xs text-red-500 mt-1">{{ form.name.errors.0 }}</p>
+                {% if form.errors %}
+                    <div class="p-6 bg-rose-50 border border-rose-100 rounded-2xl shadow-sm">
+                        <div class="flex items-center gap-3 mb-4 text-rose-800">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <h3 class="font-bold uppercase tracking-widest text-[15px]">Por favor, corrija os erros abaixo:</h3>
+                        </div>
+                        <ul class="space-y-1">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li class="text-sm text-rose-600 flex items-start gap-2">
+                                        <span class="font-semibold whitespace-nowrap">{{ field.label }}:</span>
+                                        <span>{{ error }}</span>
+                                    </li>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <li class="text-sm text-rose-600">{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 {% endif %}
             </div>
+            {% endif %}
+
+            <h1 class="brand-font text-4xl text-stone-800 mb-2">
+                {% if editando %}Editar Grupo: {{ grupo_edicao.name }}{% else %}Novo Grupo{% endif %}
+            </h1>
+            <p class="text-stone-600 italic">Defina o nome do grupo e marque as permissões concedidas a este perfil</p>
         </div>
 
-        <!-- Matriz de Permissões -->
-        <div class="bg-white rounded-2xl p-6 border border-stone-200/80 shadow-sm space-y-6">
-            <div class="flex items-center justify-between border-b border-stone-200 pb-4">
+        <form method="post" class="space-y-8">
+            {% csrf_token %}
+
+            <!-- Seção 1: Informações Básicas -->
+            <div>
+                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-6 border-b border-stone-100 pb-2">Informações Básicas</h2>
                 <div>
-                    <h2 class="text-sm uppercase tracking-wider font-semibold text-stone-700">Matriz de Permissões do Grupo</h2>
-                    <p class="text-xs text-stone-500 mt-0.5">Marque quais ações os usuários deste grupo poderão realizar</p>
+                    <label for="{{ form.name.id_for_label }}" class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">{{ form.name.label }}</label>
+                    {{ form.name }}
                 </div>
             </div>
 
-            <div class="space-y-8">
-                {% for grupo_mod in grupos %}
-                <div class="space-y-3">
-                    <h3 class="text-xs font-bold uppercase tracking-widest text-stone-500 bg-stone-50 px-3 py-1.5 rounded-lg inline-block border border-stone-200/60">
-                        {{ grupo_mod.nome }}
-                    </h3>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left text-xs">
-                            <thead>
-                                <tr class="border-b border-stone-200 text-stone-400 font-semibold uppercase">
-                                    <th class="py-2 px-3">Módulo</th>
-                                    {% for acao_cod, acao_nome in acoes %}
-                                    <th class="py-2 px-3 text-center">{{ acao_nome }}</th>
+            <!-- Seção 2: Matriz de Permissões -->
+            <div>
+                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-2 border-b border-stone-100 pb-2">Matriz de Permissões</h2>
+                <p class="text-stone-500 text-sm italic mb-6">Marque quais ações os usuários deste grupo poderão realizar</p>
+
+                <div class="space-y-8">
+                    {% for grupo_mod in grupos %}
+                    <div class="space-y-3">
+                        <h3 class="inline-block text-xs font-bold uppercase tracking-widest text-stone-500 bg-stone-50 px-3 py-1.5 rounded-full border border-stone-100">
+                            {{ grupo_mod.nome }}
+                        </h3>
+
+                        <div class="overflow-x-auto rounded-[2rem] border border-stone-100 bg-white/40 backdrop-blur-sm">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="text-[12px] uppercase tracking-[0.2em] text-stone-600 font-bold">
+                                        <th class="px-6 py-4">Módulo</th>
+                                        {% for acao_cod, acao_nome in acoes %}
+                                        <th class="px-4 py-4 text-center">{{ acao_nome }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-stone-50">
+                                    {% for linha in grupo_mod.linhas %}
+                                    <tr class="hover:bg-white/60 transition-colors">
+                                        <td class="px-6 py-4 text-sm font-semibold text-stone-800">{{ linha.nome }}</td>
+                                        {% for celula in linha.celulas %}
+                                        <td class="px-4 py-4 text-center">
+                                            {% if celula.codigo %}
+                                            <input type="checkbox" name="perms" value="{{ celula.codigo }}" {% if celula.marcada %}checked{% endif %} class="w-4 h-4 rounded border-stone-300 accent-[#B4977A]">
+                                            {% else %}
+                                            <span class="text-stone-300">&mdash;</span>
+                                            {% endif %}
+                                        </td>
+                                        {% endfor %}
+                                    </tr>
                                     {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-stone-100">
-                                {% for linha in grupo_mod.linhas %}
-                                <tr>
-                                    <td class="py-3 px-3 font-medium text-stone-700">{{ linha.nome }}</td>
-                                    {% for celula in linha.celulas %}
-                                    <td class="py-3 px-3 text-center">
-                                        {% if celula.codigo %}
-                                        <input type="checkbox" name="perms" value="{{ celula.codigo }}" {% if celula.marcada %}checked{% endif %} class="w-4 h-4 text-stone-800 rounded border-stone-300 focus:ring-stone-500">
-                                        {% else %}
-                                        <span class="text-stone-300">&mdash;</span>
-                                        {% endif %}
-                                    </td>
-                                    {% endfor %}
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
-        </div>
 
-        <div class="flex items-center justify-end space-x-4 pt-4">
-            <a href="{% url 'lista_grupos' %}" class="px-6 py-3 rounded-xl border border-stone-300 text-xs uppercase tracking-widest font-semibold text-stone-600 hover:bg-stone-50 transition-colors">
-                Cancelar
-            </a>
-            <button type="submit" class="px-8 py-3 rounded-xl bg-stone-800 text-white text-xs uppercase tracking-widest font-semibold hover:bg-stone-700 transition-colors shadow-sm">
-                Salvar Grupo
-            </button>
-        </div>
-    </form>
+            <!-- Ações -->
+            <div class="flex items-center justify-end gap-4 pt-6 border-t border-stone-100">
+                <a href="{% url 'lista_grupos' %}" class="text-stone-400 hover:text-stone-600 font-medium transition-colors">Cancelar</a>
+                <button type="submit" class="px-10 py-4 bg-[#B4977A] text-white font-bold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20">
+                    Salvar Grupo
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 {% endblock %}

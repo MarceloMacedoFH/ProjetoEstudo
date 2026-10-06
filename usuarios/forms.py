@@ -8,9 +8,12 @@ from django.core.exceptions import ValidationError
 User = get_user_model()
 
 CSS = (
-    "w-full px-4 py-3 rounded-xl border border-stone-300 bg-white/70 text-sm "
-    "focus:outline-none focus:border-stone-500"
+    "w-full px-4 py-3 rounded-xl border border-stone-200 bg-white text-sm text-stone-700 "
+    "focus:outline-none focus:ring-2 focus:ring-[#B4977A]/20 focus:border-[#B4977A] "
+    "transition-all"
 )
+
+CHECK_CSS = "w-4 h-4 rounded border-stone-300 accent-[#B4977A]"
 
 
 class LoginForm(AuthenticationForm):
@@ -81,6 +84,8 @@ class UsuarioForm(forms.ModelForm):
             "username": forms.TextInput(attrs={"class": CSS}),
             "first_name": forms.TextInput(attrs={"class": CSS}),
             "last_name": forms.TextInput(attrs={"class": CSS}),
+            "is_active": forms.CheckboxInput(attrs={"class": CHECK_CSS}),
+            "is_superuser": forms.CheckboxInput(attrs={"class": CHECK_CSS}),
         }
 
     def __init__(self, *args, **kwargs):
