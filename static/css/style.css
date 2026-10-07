@@ -96,7 +96,7 @@ h1, h2, h3, .brand-font {
 .premium-card {
     background: rgba(255, 255, 255, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.8);
-    border-radius: 2.5rem;
+    border-radius: 1.5rem;
     box-shadow: var(--shadow-soft);
 }
 
@@ -109,4 +109,23 @@ h1, h2, h3, .brand-font {
     letter-spacing: 0.1em;
     color: var(--text-muted);
     border-top: 1px solid var(--glass-border);
+}
+
+/* --- RESPONSIVIDADE --- */
+@media (min-width: 768px) {
+    .premium-card { border-radius: 2.5rem; }
+}
+
+/* Evita o zoom automático do iPhone ao focar em campos */
+@media (max-width: 767px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* Em telas de toque, o hover não deve "empurrar" os itens */
+@media (hover: none) {
+    .hover-link:hover { transform: none; }
 }

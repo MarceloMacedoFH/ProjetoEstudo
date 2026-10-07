@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="max-w-5xl mx-auto">
-    <div class="premium-card p-10">
+    <div class="premium-card p-5 md:p-10">
         <div class="mb-10 text-center">
             {% if form.errors or formset.non_form_errors or messages %}
             <div class="mb-8 text-left">
@@ -39,7 +39,7 @@
                 {% endif %}
             </div>
             {% endif %}
-            <h1 class="brand-font text-4xl text-stone-800 mb-2">Nova Locação</h1>
+            <h1 class="brand-font text-3xl md:text-4xl text-stone-800 mb-2">Nova Locação</h1>
             <p class="text-stone-600 italic">Preencha os dados do cliente e as peças que serão alugadas</p>
         </div>
 
@@ -48,7 +48,7 @@
 
             <!-- Seção: Dados da locação -->
             <div>
-                <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-6 border-b border-stone-100 pb-2">Dados da Locação</h2>
+                <h2 class="text-base md:text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold mb-6 border-b border-stone-100 pb-2">Dados da Locação</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="md:col-span-2">
                         <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Cliente</label>
@@ -80,8 +80,8 @@
 
             <!-- Seção: Peças da locação (formset dinâmico) -->
             <div>
-                <div class="flex items-center justify-between border-b border-stone-100 pb-2 mb-6">
-                    <h2 class="text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold">Peças da Locação</h2>
+                <div class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-2 mb-6">
+                    <h2 class="text-base md:text-[20px] uppercase tracking-[0.2em] text-[#B4977A] font-bold">Peças da Locação</h2>
                     <button type="button" id="btn-add-item" class="inline-flex items-center px-4 py-2 bg-stone-100 text-stone-700 text-xs font-bold uppercase tracking-widest rounded-full hover:bg-stone-200 transition-all">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Adicionar Peça
@@ -106,7 +106,7 @@
                             <label class="block text-[11px] font-bold text-stone-400 mb-1 uppercase tracking-wider">Disponibilidade</label>
                             <p class="disponibilidade-indicador text-xs font-semibold text-stone-400 pt-2.5">—</p>
                         </div>
-                        <div class="md:col-span-1 flex items-end justify-end h-full pt-5">
+                        <div class="md:col-span-1 flex items-end justify-end md:h-full md:pt-5">
                             {% if item_form.DELETE %}
                                 <label class="hidden">{{ item_form.DELETE }}</label>
                             {% endif %}
@@ -136,7 +136,7 @@
                             <label class="block text-[11px] font-bold text-stone-400 mb-1 uppercase tracking-wider">Disponibilidade</label>
                             <p class="disponibilidade-indicador text-xs font-semibold text-stone-400 pt-2.5">—</p>
                         </div>
-                        <div class="md:col-span-1 flex items-end justify-end h-full pt-5">
+                        <div class="md:col-span-1 flex items-end justify-end md:h-full md:pt-5">
                             <button type="button" class="btn-remove-item p-2 text-stone-400 hover:text-red-500 transition-colors" title="Remover peça">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                             </button>
@@ -146,7 +146,7 @@
             </div>
 
             <!-- Ações -->
-            <div class="flex items-center justify-end gap-4 pt-6 border-t border-stone-100">
+            <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-4 pt-6 border-t border-stone-100 text-center">
                 <a href="{% url 'lista_locacoes' %}" class="text-stone-400 hover:text-stone-600 font-medium transition-colors">Cancelar</a>
                 <button type="submit" class="px-10 py-4 bg-[#B4977A] text-white font-bold rounded-full hover:bg-[#a38669] transition-all shadow-lg shadow-[#B4977A]/20">
                     Salvar Locação
