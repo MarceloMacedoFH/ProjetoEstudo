@@ -77,7 +77,7 @@ class Locacao(models.Model):
     data_devolucao_real = models.DateField(null=True, blank=True)
 
     sinal_pago = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    desconto_ajuste = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    desconto = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     # Travado no momento em que uma locação indicada por esta é fechada.
     # Nunca recalculado a partir do estado atual das indicações.

@@ -1,16 +1,19 @@
+import re
 from datetime import datetime
 
 from django.contrib import messages
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Q
+from django.db.models import Q, Value
+from django.db.models.functions import Replace
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 
+from clientes.models import Cliente
 from estoque.models import Produto
 
-from .forms import ItemLocacaoFormSet, LocacaoForm
+from .forms import ItemLocacaoFormSet, LocacaoForm, _formatar_cliente_com_cpf
 from .models import ItemLocacao, Locacao
 
 
@@ -265,3 +268,38 @@ def consulta_disponibilidade(request):
         'reservas': reservas,
         'codigo': codigo,
     })
+
+
+# ---------------------------------------------------------------------------
+# Autocomplete de clientes (campo de busca por nome ou CPF no formulário de locação)
+# ---------------------------------------------------------------------------
+def autocomplete_clientes(request):
+    termo = request.GET.get('termo', '').strip()
+    clientes = []
+
+    if len(termo) >= 2:
+        filtro = Q(nome__icontains=termo)
+
+        # Se o termo parece um CPF (só números, pontos, traços ou espaços), busca também
+        # pelo CPF ignorando a pontuação, não importa como ele foi gravado no banco.
+        if re.fullmatch(r'[\d.\-\s]+', termo):
+            digitos = re.sub(r'\D', '', termo)
+            if digitos:
+                filtro |= Q(cpf_limpo__icontains=digitos)
+
+        cpf_limpo = Replace(
+            Replace(Replace('cpf', Value('.'), Value('')), Value('-'), Value('')),
+            Value(' '), Value(''),
+        )
+        queryset = (
+            Cliente.objects
+            .annotate(cpf_limpo=cpf_limpo)
+            .filter(filtro)
+            .order_by('nome')[:10]
+        )
+        clientes = [
+            {'id': c.pk, 'nome': c.nome, 'label': _formatar_cliente_com_cpf(c)}
+            for c in queryset
+        ]
+
+    return JsonResponse({'clientes': clientes})

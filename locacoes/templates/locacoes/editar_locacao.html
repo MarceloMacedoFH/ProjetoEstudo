@@ -77,7 +77,14 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="md:col-span-2">
                         <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Cliente</label>
-                        {{ form.cliente }}
+                        <div class="relative">
+                            {{ form.cliente }}
+                            <input type="text" id="cliente-busca" autocomplete="off" value="{{ form.cliente_label }}"
+                                placeholder="Digite o nome ou o CPF do cliente"
+                                class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-[#B4977A] focus:ring-1 focus:ring-[#B4977A] outline-none transition-all bg-white/50 placeholder-stone-400">
+                            <ul id="lista-clientes" class="hidden absolute z-30 mt-2 w-full bg-white border border-stone-100 rounded-2xl shadow-lg overflow-hidden max-h-72 overflow-y-auto"></ul>
+                        </div>
+                        <p id="cliente-erro" class="hidden text-xs text-rose-600 mt-2">Selecione um cliente da lista de sugestões.</p>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Data de Retirada</label>
@@ -98,7 +105,7 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Desconto / Ajuste (R$)</label>
-                    {{ form.desconto_ajuste }}
+                    {{ form.desconto }}
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Saldo Atual</label>
@@ -292,6 +299,117 @@ document.addEventListener('DOMContentLoaded', function () {
     if (dataRetiradaInput) {
         dataRetiradaInput.addEventListener('change', function () {
             document.querySelectorAll('.item-linha').forEach(checarDisponibilidade);
+        });
+    }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const campoBusca = document.getElementById('cliente-busca');
+    const campoId = document.getElementById('id_cliente');
+    const lista = document.getElementById('lista-clientes');
+    const msgErro = document.getElementById('cliente-erro');
+    const formLocacao = document.getElementById('form-locacao');
+    if (!campoBusca || !campoId || !lista) return;
+
+    let timeoutId = null;
+    let itemAtivo = -1;
+
+    function esconderLista() {
+        lista.classList.add('hidden');
+        lista.innerHTML = '';
+        itemAtivo = -1;
+    }
+
+    function selecionar(cliente) {
+        campoId.value = cliente.id;
+        campoBusca.value = cliente.nome;
+        msgErro.classList.add('hidden');
+        esconderLista();
+    }
+
+    function destacar(indice) {
+        const opcoes = lista.querySelectorAll('.opcao-cliente');
+        if (opcoes.length === 0) return;
+        itemAtivo = (indice + opcoes.length) % opcoes.length;
+        opcoes.forEach((li, i) => li.classList.toggle('bg-stone-50', i === itemAtivo));
+        opcoes[itemAtivo].scrollIntoView({ block: 'nearest' });
+    }
+
+    function mostrarSugestoes(clientes) {
+        lista.innerHTML = '';
+        itemAtivo = -1;
+
+        if (clientes.length === 0) {
+            const vazio = document.createElement('li');
+            vazio.className = 'px-5 py-3 text-sm text-stone-400 italic';
+            vazio.textContent = 'Nenhum cliente encontrado';
+            lista.appendChild(vazio);
+        } else {
+            clientes.forEach(function (cliente) {
+                const li = document.createElement('li');
+                li.className = 'opcao-cliente px-5 py-3 text-sm text-stone-700 cursor-pointer hover:bg-stone-50 transition-colors border-b border-stone-50 last:border-0';
+                li.textContent = cliente.label;
+                li.addEventListener('click', function () { selecionar(cliente); });
+                lista.appendChild(li);
+            });
+        }
+        lista.classList.remove('hidden');
+    }
+
+    function buscarClientes(termo) {
+        fetch(`{% url 'autocomplete_clientes' %}?termo=${encodeURIComponent(termo)}`)
+            .then(response => response.json())
+            .then(data => {
+                // Ignora respostas antigas, caso o usuário já tenha digitado outra coisa
+                if (campoBusca.value.trim() !== termo) return;
+                mostrarSugestoes(data.clientes || []);
+            })
+            .catch(() => esconderLista());
+    }
+
+    campoBusca.addEventListener('input', function () {
+        // Qualquer edição no texto invalida o cliente selecionado antes
+        campoId.value = '';
+        const termo = campoBusca.value.trim();
+        clearTimeout(timeoutId);
+        if (termo.length < 2) {
+            esconderLista();
+            return;
+        }
+        timeoutId = setTimeout(function () { buscarClientes(termo); }, 250);
+    });
+
+    campoBusca.addEventListener('keydown', function (e) {
+        const aberta = !lista.classList.contains('hidden');
+        if (e.key === 'ArrowDown' && aberta) {
+            e.preventDefault();
+            destacar(itemAtivo + 1);
+        } else if (e.key === 'ArrowUp' && aberta) {
+            e.preventDefault();
+            destacar(itemAtivo - 1);
+        } else if (e.key === 'Enter' && aberta && itemAtivo >= 0) {
+            e.preventDefault();
+            lista.querySelectorAll('.opcao-cliente')[itemAtivo].click();
+        } else if (e.key === 'Escape') {
+            esconderLista();
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        if (e.target !== campoBusca && !lista.contains(e.target)) {
+            esconderLista();
+        }
+    });
+
+    // Impede salvar sem ter escolhido um cliente da lista
+    if (formLocacao) {
+        formLocacao.addEventListener('submit', function (e) {
+            if (!campoId.value) {
+                e.preventDefault();
+                msgErro.classList.remove('hidden');
+                campoBusca.focus();
+            }
         });
     }
 });

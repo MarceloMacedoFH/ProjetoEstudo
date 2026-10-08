@@ -3,6 +3,8 @@ import re
 from django import forms
 from django.forms import inlineformset_factory
 
+from clientes.models import Cliente
+
 from .models import Locacao, ItemLocacao
 
 
@@ -20,16 +22,19 @@ def _formatar_cliente_com_cpf(cliente):
 class LocacaoForm(forms.ModelForm):
     class Meta:
         model = Locacao
-        fields = ['cliente', 'data_retirada', 'sinal_pago', 'desconto_ajuste', 'indicado_por']
+        fields = ['cliente', 'data_retirada', 'sinal_pago', 'desconto', 'indicado_por']
         widgets = {
             'data_retirada': forms.DateInput(format='%Y-%m-%d', attrs={'type': 'date'}),
             'sinal_pago': forms.TextInput(attrs={'autocomplete': 'off', 'inputmode': 'decimal'}),
-            'desconto_ajuste': forms.TextInput(attrs={'autocomplete': 'off', 'inputmode': 'decimal'}),
+            'desconto': forms.TextInput(attrs={'autocomplete': 'off', 'inputmode': 'decimal'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['cliente'].label_from_instance = _formatar_cliente_com_cpf
+        # O cliente agora é escolhido por um campo de busca (nome ou CPF) na tela;
+        # o campo real do formulário guarda apenas o id do cliente selecionado.
+        self.fields['cliente'].widget = forms.HiddenInput()
         self.fields['indicado_por'].required = False
         self.fields['indicado_por'].label = 'Indicado por (opcional)'
         # Não deixa a própria locação se indicar, e tira canceladas da lista
@@ -49,6 +54,19 @@ class LocacaoForm(forms.ModelForm):
                     'class': 'w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-[#B4977A] focus:ring-1 focus:ring-[#B4977A] outline-none transition-all bg-white/50 placeholder-stone-400',
                     'placeholder': field.label,
                 })
+
+    @property
+    def cliente_label(self):
+        """Texto do campo de busca de cliente (somente o nome) ao abrir/reabrir o formulário."""
+        pk = self['cliente'].value()
+        if pk:
+            try:
+                cliente = Cliente.objects.filter(pk=pk).first()
+            except (ValueError, TypeError):
+                cliente = None
+            if cliente:
+                return cliente.nome
+        return ''
 
 
 class ItemLocacaoForm(forms.ModelForm):

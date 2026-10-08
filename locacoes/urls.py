@@ -12,5 +12,6 @@ urlpatterns = [
     path('locacoes/item/<int:item_pk>/devolver/', views.marcar_devolvido_item, name='marcar_devolvido_item'),
     path('locacoes/ajax/disponibilidade/', views.verificar_disponibilidade, name='verificar_disponibilidade'),
     path('locacoes/ajax/autocomplete-produtos/', views.autocomplete_produtos, name='autocomplete_produtos'),
+    path('locacoes/ajax/autocomplete-clientes/', views.autocomplete_clientes, name='autocomplete_clientes'),
     path('locacoes/consulta-disponibilidade/', views.consulta_disponibilidade, name='consulta_disponibilidade'),
 ]
