@@ -145,7 +145,7 @@ class Locacao(models.Model):
         return (
             self.valor_total
             - self.sinal_pago
-            - self.desconto_ajuste
+            - self.desconto
             - self.desconto_indicacao_acumulado
         )
 

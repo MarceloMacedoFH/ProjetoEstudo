@@ -13,7 +13,12 @@ from django.utils import timezone
 from clientes.models import Cliente
 from estoque.models import Produto
 
-from .forms import ItemLocacaoFormSet, LocacaoForm, _formatar_cliente_com_cpf
+from .forms import (
+    ItemLocacaoFormSet,
+    LocacaoForm,
+    _formatar_cliente_com_cpf,
+    _formatar_locacao_indicacao,
+)
 from .models import ItemLocacao, Locacao
 
 
@@ -303,3 +308,41 @@ def autocomplete_clientes(request):
         ]
 
     return JsonResponse({'clientes': clientes})
+
+
+# ---------------------------------------------------------------------------
+# Autocomplete de locações (campo "Indicado por": busca por nome do cliente ou nº da locação)
+# ---------------------------------------------------------------------------
+def autocomplete_locacoes(request):
+    termo = request.GET.get('termo', '').strip()
+    locacao_atual_id = request.GET.get('locacao_id', '').strip()
+    locacoes = []
+
+    numero = termo.lstrip('#').strip()
+    numero_valido = numero.isdigit() and len(numero) <= 9
+
+    if len(termo) >= 2 or numero_valido:
+        filtro = Q(cliente__nome__icontains=termo)
+        if numero_valido:
+            filtro |= Q(pk=int(numero))
+
+        queryset = (
+            Locacao.objects.select_related('cliente')
+            .exclude(status__in=[Locacao.STATUS_DEVOLVIDA, Locacao.STATUS_CANCELADA])
+            .filter(filtro)
+        )
+        # Na edição, a própria locação não pode indicar a si mesma
+        if locacao_atual_id.isdigit():
+            queryset = queryset.exclude(pk=int(locacao_atual_id))
+
+        for locacao in queryset.order_by('-data_fechamento', '-pk')[:10]:
+            locacoes.append({
+                'id': locacao.pk,
+                'texto': _formatar_locacao_indicacao(locacao),
+                'label': (
+                    f'#{locacao.pk} - {locacao.cliente.nome} · '
+                    f'Retirada {locacao.data_retirada:%d/%m/%Y} · {locacao.get_status_display()}'
+                ),
+            })
+
+    return JsonResponse({'locacoes': locacoes})

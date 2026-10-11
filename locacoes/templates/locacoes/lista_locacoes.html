@@ -34,6 +34,7 @@
         <table class="w-full text-left border-collapse">
             <thead>
                 <tr class="text-[12px] uppercase tracking-[0.2em] text-stone-600 font-bold">
+                    <th class="px-6 py-5">Número locação</th>
                     <th class="px-6 py-5">Cliente</th>
                     <th class="px-6 py-5">Retirada</th>
                     <th class="px-6 py-5">Devolução Prevista</th>
@@ -45,6 +46,9 @@
             <tbody class="divide-y divide-stone-50">
                 {% for locacao in locacoes %}
                 <tr class="hover:bg-white/60 transition-colors group">
+                    <td class="px-6 py-5">
+                        {{locacao.id}}
+                    </td>
                     <td class="px-6 py-5">
                         <div class="flex items-center">
                             <div class="w-10 h-10 rounded-full bg-stone-100 flex items-center justify-center text-[#B4977A] font-bold text-sm mr-3 border border-stone-200">
@@ -93,7 +97,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="px-6 py-20 text-center">
+                    <td colspan="7" class="px-6 py-20 text-center">
                         <div class="flex flex-col items-center">
                             <div class="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mb-4">
                                 <svg class="w-10 h-10 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>

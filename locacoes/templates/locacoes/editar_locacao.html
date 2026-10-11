@@ -92,7 +92,15 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-stone-500 mb-2 uppercase tracking-wider">Indicado por (opcional)</label>
-                        {{ form.indicado_por }}
+                        <div class="relative">
+                            {{ form.indicado_por }}
+                            <input type="text" id="indicacao-busca" autocomplete="off" value="{{ form.indicado_por_label }}"
+                                placeholder="Nome do cliente ou nº da locação"
+                                class="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-[#B4977A] focus:ring-1 focus:ring-[#B4977A] outline-none transition-all bg-white/50 placeholder-stone-400">
+                            <ul id="lista-indicacoes" class="hidden absolute z-30 mt-2 w-full bg-white border border-stone-100 rounded-2xl shadow-lg overflow-hidden max-h-72 overflow-y-auto"></ul>
+                        </div>
+                        <p class="text-xs text-stone-400 italic mt-2">Aparecem apenas locações em andamento (não devolvidas nem canceladas).</p>
+                        <p id="indicacao-erro" class="hidden text-xs text-rose-600 mt-2">Selecione uma locação da lista de sugestões ou limpe o campo.</p>
                     </div>
                 </div>
             </div>
@@ -406,6 +414,126 @@ document.addEventListener('DOMContentLoaded', function () {
     if (formLocacao) {
         formLocacao.addEventListener('submit', function (e) {
             if (!campoId.value) {
+                e.preventDefault();
+                msgErro.classList.remove('hidden');
+                campoBusca.focus();
+            }
+        });
+    }
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const campoBusca = document.getElementById('indicacao-busca');
+    const campoId = document.getElementById('id_indicado_por');
+    const lista = document.getElementById('lista-indicacoes');
+    const msgErro = document.getElementById('indicacao-erro');
+    const formLocacao = document.getElementById('form-locacao');
+    // Na edição, a própria locação não aparece nas sugestões (vazio na criação)
+    const locacaoAtualId = '{{ locacao.pk|default:"" }}';
+    if (!campoBusca || !campoId || !lista) return;
+
+    let timeoutId = null;
+    let itemAtivo = -1;
+
+    function termoValido(termo) {
+        // Nome: a partir de 2 letras. Número da locação (com ou sem #): a partir de 1 dígito.
+        return termo.length >= 2 || /^\d+$/.test(termo.replace(/^#/, '').trim());
+    }
+
+    function esconderLista() {
+        lista.classList.add('hidden');
+        lista.innerHTML = '';
+        itemAtivo = -1;
+    }
+
+    function selecionar(locacao) {
+        campoId.value = locacao.id;
+        campoBusca.value = locacao.texto;
+        msgErro.classList.add('hidden');
+        esconderLista();
+    }
+
+    function destacar(indice) {
+        const opcoes = lista.querySelectorAll('.opcao-indicacao');
+        if (opcoes.length === 0) return;
+        itemAtivo = (indice + opcoes.length) % opcoes.length;
+        opcoes.forEach((li, i) => li.classList.toggle('bg-stone-50', i === itemAtivo));
+        opcoes[itemAtivo].scrollIntoView({ block: 'nearest' });
+    }
+
+    function mostrarSugestoes(locacoes) {
+        lista.innerHTML = '';
+        itemAtivo = -1;
+
+        if (locacoes.length === 0) {
+            const vazio = document.createElement('li');
+            vazio.className = 'px-5 py-3 text-sm text-stone-400 italic';
+            vazio.textContent = 'Nenhuma locação em andamento encontrada';
+            lista.appendChild(vazio);
+        } else {
+            locacoes.forEach(function (locacao) {
+                const li = document.createElement('li');
+                li.className = 'opcao-indicacao px-5 py-3 text-sm text-stone-700 cursor-pointer hover:bg-stone-50 transition-colors border-b border-stone-50 last:border-0';
+                li.textContent = locacao.label;
+                li.addEventListener('click', function () { selecionar(locacao); });
+                lista.appendChild(li);
+            });
+        }
+        lista.classList.remove('hidden');
+    }
+
+    function buscarLocacoes(termo) {
+        fetch(`{% url 'autocomplete_locacoes' %}?termo=${encodeURIComponent(termo)}&locacao_id=${encodeURIComponent(locacaoAtualId)}`)
+            .then(response => response.json())
+            .then(data => {
+                // Ignora respostas antigas, caso o usuário já tenha digitado outra coisa
+                if (campoBusca.value.trim() !== termo) return;
+                mostrarSugestoes(data.locacoes || []);
+            })
+            .catch(() => esconderLista());
+    }
+
+    campoBusca.addEventListener('input', function () {
+        // Qualquer edição no texto invalida a indicação selecionada antes
+        // (campo vazio = sem indicação, pois é opcional)
+        campoId.value = '';
+        msgErro.classList.add('hidden');
+        const termo = campoBusca.value.trim();
+        clearTimeout(timeoutId);
+        if (!termoValido(termo)) {
+            esconderLista();
+            return;
+        }
+        timeoutId = setTimeout(function () { buscarLocacoes(termo); }, 250);
+    });
+
+    campoBusca.addEventListener('keydown', function (e) {
+        const aberta = !lista.classList.contains('hidden');
+        if (e.key === 'ArrowDown' && aberta) {
+            e.preventDefault();
+            destacar(itemAtivo + 1);
+        } else if (e.key === 'ArrowUp' && aberta) {
+            e.preventDefault();
+            destacar(itemAtivo - 1);
+        } else if (e.key === 'Enter' && aberta && itemAtivo >= 0) {
+            e.preventDefault();
+            lista.querySelectorAll('.opcao-indicacao')[itemAtivo].click();
+        } else if (e.key === 'Escape') {
+            esconderLista();
+        }
+    });
+
+    document.addEventListener('click', function (e) {
+        if (e.target !== campoBusca && !lista.contains(e.target)) {
+            esconderLista();
+        }
+    });
+
+    // Se digitou algo mas não escolheu da lista, avisa em vez de salvar sem indicação
+    if (formLocacao) {
+        formLocacao.addEventListener('submit', function (e) {
+            if (campoBusca.value.trim() && !campoId.value) {
                 e.preventDefault();
                 msgErro.classList.remove('hidden');
                 campoBusca.focus();

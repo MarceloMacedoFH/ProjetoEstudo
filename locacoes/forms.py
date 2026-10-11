@@ -1,6 +1,7 @@
 import re
 
 from django import forms
+from django.db.models import Q
 from django.forms import inlineformset_factory
 
 from clientes.models import Cliente
@@ -17,6 +18,11 @@ def _formatar_cliente_com_cpf(cliente):
     # CPF fora do padrão (não tem 11 dígitos numéricos) — sinaliza em vez de
     # esconder o problema, pra facilitar encontrar cadastros com erro de digitação.
     return f"{cliente.nome} (⚠ CPF inválido: {cliente.cpf or 'não informado'})"
+
+
+def _formatar_locacao_indicacao(locacao):
+    """Texto que fica no campo 'Indicado por' depois de selecionar: '#12 - NOME DO CLIENTE'."""
+    return f"#{locacao.pk} - {locacao.cliente.nome}"
 
 
 class LocacaoForm(forms.ModelForm):
@@ -37,8 +43,18 @@ class LocacaoForm(forms.ModelForm):
         self.fields['cliente'].widget = forms.HiddenInput()
         self.fields['indicado_por'].required = False
         self.fields['indicado_por'].label = 'Indicado por (opcional)'
-        # Não deixa a própria locação se indicar, e tira canceladas da lista
-        qs = Locacao.objects.exclude(status=Locacao.STATUS_CANCELADA).select_related('cliente')
+        # A indicação é escolhida por um campo de busca (nome do cliente ou nº da locação);
+        # o campo real do formulário guarda apenas o id da locação selecionada.
+        self.fields['indicado_por'].widget = forms.HiddenInput()
+        # Só locações em andamento podem indicar (nem devolvidas, nem canceladas).
+        # Se a locação já tinha uma indicação salva, ela continua válida mesmo que
+        # a locação indicadora tenha sido concluída depois.
+        status_excluidos = [Locacao.STATUS_DEVOLVIDA, Locacao.STATUS_CANCELADA]
+        filtro = ~Q(status__in=status_excluidos)
+        if self.instance.indicado_por_id:
+            filtro |= Q(pk=self.instance.indicado_por_id)
+        qs = Locacao.objects.filter(filtro).select_related('cliente')
+        # Não deixa a própria locação se indicar
         if self.instance.pk:
             qs = qs.exclude(pk=self.instance.pk)
         self.fields['indicado_por'].queryset = qs
@@ -66,6 +82,19 @@ class LocacaoForm(forms.ModelForm):
                 cliente = None
             if cliente:
                 return cliente.nome
+        return ''
+
+    @property
+    def indicado_por_label(self):
+        """Texto do campo de busca 'Indicado por' ao abrir/reabrir o formulário."""
+        pk = self['indicado_por'].value()
+        if pk:
+            try:
+                indicadora = Locacao.objects.select_related('cliente').filter(pk=pk).first()
+            except (ValueError, TypeError):
+                indicadora = None
+            if indicadora:
+                return _formatar_locacao_indicacao(indicadora)
         return ''
 
 
