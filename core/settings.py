@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'clientes',
     'locacoes',
     'usuarios',
+    'gestao_pessoal',
 ]
 
 MIDDLEWARE = [
