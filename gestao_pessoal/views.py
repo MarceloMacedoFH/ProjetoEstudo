@@ -1,12 +1,64 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
-from .models import Funcionario
-from .forms import FuncionarioForm
+from .models import Funcionario, Cargo
+from .forms import FuncionarioForm, CargoForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
-# Create your views here.
+#Cargos
+def lista_cargos(request):
+    query = request.GET.get('q')
+    if query:
+        list = Cargo.objects.filter(
+            Q(descricao__icontains=query)
+        )
+    else:
+        list = Cargo.objects.all()
+
+    paginator = Paginator(list, 50)  # Limite de 50 registros por página
+    page = request.GET.get('page')
+    try:
+        cargos = paginator.page(page)
+    except PageNotAnInteger:
+        cargos = paginator.page(1)
+    except EmptyPage:
+        cargos = paginator.page(paginator.num_pages)
+
+    context = {'cargos': cargos, 'query': query}
+
+    return render(request, 'gestao_pessoal/cargos/lista_cargos.html', context)
+
+def criar_cargo(request):
+    if request.method == 'POST':
+        form = CargoForm(request.POST)
+        if form.is_valid():
+            cargo = form.save()
+            return redirect(f"{reverse('lista_cargos')}?q={cargo.descricao}")
+    else:
+        form = CargoForm()
+        return render(request, 'gestao_pessoal/cargos/criar_cargo.html', {'form': form})
+
+def editar_cargo(request, pk):
+    cargo = get_object_or_404(Cargo, pk=pk)
+    if request.method == 'POST':
+        form = CargoForm(request.POST, instance=cargo)
+        if form.is_valid():
+            cargo = form.save()
+            return redirect(f"{reverse('lista_cargos')}?q={cargo.descricao}")
+    else:
+        form = CargoForm(instance=cargo)
+    return render(request, 'gestao_pessoal/cargos/editar_cargo.html', {'form': form, 'cargo': cargo})
+
+def excluir_cargo(request, pk):
+    cargo = get_object_or_404(Cargo, pk=pk)
+    if request.method == 'POST':
+        cargo.delete()
+        return redirect('lista_cargos')
+    return render(request, 'gestao_pessoal/cargos/confirmar_exclusao.html', {'cargo': cargo})
+
+
+#Funcionários
 def lista_funcionarios(request):
     query = request.GET.get('q')
     if query:

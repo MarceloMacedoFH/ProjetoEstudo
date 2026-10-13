@@ -1,6 +1,20 @@
 from django.db import models, transaction
 
 # Create your models here.
+class Cargo(models.Model):
+    descricao = models.CharField(max_length=20, verbose_name='Descrição')
+    status = models.BooleanField(default=True, verbose_name='Status')
+
+    def save(self, *args, **kwargs):
+        if self.descricao:
+             self.descricao = self.descricao.upper()
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+         return self.descricao
+             
+
 class Funcionario(models.Model):
     ESTADO_CIVIL_CHOICES = [
         ('C', 'Casado(a)'), ('D', 'Divorciado(a)'), ('S', 'Solteio(a)'), ('U', 'União Estável'), ('V', 'Viuvo(a)'),
@@ -60,6 +74,7 @@ class Funcionario(models.Model):
     pis = models.CharField(max_length=11, blank=True, null=True, verbose_name='P.I.S.')
     salario = models.DecimalField(max_digits=8, decimal_places=2, default=0.00, blank=True, null=True, verbose_name='Salário')
     status = models.BooleanField(default=True, verbose_name='Status')
+    cargo = models.ForeignKey(Cargo, blank=True, null=True, on_delete=models.PROTECT, verbose_name='Cargo')
     
     def save(self, *args, **kwargs):
         # Usamos transaction.atomic para garantir que as duas etapas ocorram com segurança

@@ -102,24 +102,27 @@
 
             {% if user.is_superuser %}
             <div>
-                <button id="btn-usuario" class="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all hover-link focus:outline-none group">
+                <button id="btn-gestao_empresa" class="w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all hover-link focus:outline-none group">
                     <span class="flex items-center">
                         <svg class="w-5 h-5 mr-4 text-stone-500 group-hover:text-stone-700 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                        Usuários
+                        Gestão Empresa
                     </span>
-                    <svg id="seta-usuario" class="w-4 h-4 transform transition-transform duration-250 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg id="seta-gestao_empresa" class="w-4 h-4 transform transition-transform duration-250 text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </button>
-                <div id="submenu-usuario" class="hidden pl-12 mt-2 space-y-1 border-l border-stone-300 ml-6">
+                <div id="submenu-gestao_empresa" class="hidden pl-12 mt-2 space-y-1 border-l border-stone-300 ml-6">
+                    <a href="{% url 'lista_cargos' %}" class="w-full flex items-center px-4 py-3.5 rounded-2xl transition-all hover-link group">
+                        <span>Cargos</span>
+                    </a>
+                    <a href="{% url 'lista_funcionarios' %}" class="w-full flex items-center px-4 py-3.5 rounded-2xl transition-all hover-link group">
+                        <span>Funcionários</span>
+                    </a>
                     <a href="{% url 'lista_grupos' %}" class="w-full flex items-center px-4 py-3.5 rounded-2xl transition-all hover-link group">
                         <span>Grupo de acessos</span>
                     </a>
                     <a href="{% url 'lista_usuarios' %}" class="w-full flex items-center px-4 py-3.5 rounded-2xl transition-all hover-link group">
                         <span>Usuários</span>
-                    </a>
-                    <a href="{% url 'lista_funcionarios' %}" class="w-full flex items-center px-4 py-3.5 rounded-2xl transition-all hover-link group">
-                        <span>Funcionários</span>
                     </a>
                 </div>
             </div>
@@ -195,9 +198,9 @@
         seta.classList.toggle('rotate-180');
     });
 
-    document.getElementById('btn-usuario')?.addEventListener('click', function() {
-        const submenu = document.getElementById('submenu-usuario');
-        const seta = document.getElementById('seta-usuario');
+    document.getElementById('btn-gestao_empresa')?.addEventListener('click', function() {
+        const submenu = document.getElementById('submenu-gestao_empresa');
+        const seta = document.getElementById('seta-gestao_empresa');
         
         // Alterna a visibilidade do submenu
         submenu.classList.toggle('hidden');
