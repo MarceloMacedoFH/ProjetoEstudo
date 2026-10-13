@@ -38,6 +38,7 @@
                     <th class="px-6 py-5">Nome</th>
                     <th class="px-6 py-5">CPF</th>
                     <th class="px-6 py-5">Contato</th>
+                    <th class="px-6 py-5">Cargo</th>
                     <th class="px-6 py-5">Status</th>
                     <th class="px-6 py-5 text-right">Ações</th>
                 </tr>
@@ -53,6 +54,9 @@
                     </td>
                     <td class="px-6 py-5 text-sm text-stone-600">{{ funcionario.cpf }}</td>
                     <td class="px-6 py-5 text-sm text-stone-600">{{ funcionario.contato }}</td>
+                    <td class="px-6 py-5">
+                        <span class="font-mono text-xm text-[#B4977A] font-bold">{{ <funcionario class="cargo"></funcionario> }}</span>
+                    </td>
                     <td class="px-6 py-5">
                         {% if funcionario.status %}
                         <span class="inline-flex items-center text-emerald-600 text-[10px] uppercase tracking-widest font-bold">
