@@ -98,4 +98,4 @@ class Funcionario(models.Model):
                 super().save(update_fields=['matricula'])
 
     def __str__(self):
-        return f"{self.matricula} - {self.nome}"
+        return f"{self.matricula} - {self.nome_completo}"

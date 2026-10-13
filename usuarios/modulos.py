@@ -70,6 +70,11 @@ PREFIXOS = {
     "excluir": "delete", "deletar": "delete", "remover": "delete", "apagar": "delete",
 }
 
+# Áreas de gestão da empresa (dados sensíveis de funcionários, como CPF, RG e salário):
+# qualquer URL cujo nome contenha uma destas palavras é exclusiva do administrador,
+# o mesmo critério que já esconde esses itens do menu para quem não é superusuário.
+PALAVRAS_SOMENTE_ADMIN = {"cargo", "cargos", "funcionario", "funcionarios"}
+
 PERMISSOES_POR_URL = {
     "autocomplete_produtos": PERMISSOES_DISPONIBILIDADE,
     "verificar_disponibilidade": PERMISSOES_DISPONIBILIDADE,

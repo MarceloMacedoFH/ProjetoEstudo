@@ -11,6 +11,7 @@ from .modulos import (
     ALVOS,
     MODULOS,
     PERMISSOES_DISPONIBILIDADE,
+    PALAVRAS_SOMENTE_ADMIN,
     PERMISSOES_POR_URL,
     PREFIXOS,
     SOMENTE_ADMIN,
@@ -138,6 +139,10 @@ class ControleAcessoMiddleware:
 
         palavras = nome.split("_")
         if {"usuario", "usuarios"} & set(palavras):
+            return SOMENTE_ADMIN
+
+        # gestão de pessoal (cargos e funcionários): exclusiva do administrador
+        if PALAVRAS_SOMENTE_ADMIN & set(palavras):
             return SOMENTE_ADMIN
 
         # consulta_disponibilidade e verificar_disponibilidade: não dependem do módulo Locações

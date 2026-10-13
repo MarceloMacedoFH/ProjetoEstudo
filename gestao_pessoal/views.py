@@ -37,7 +37,7 @@ def criar_cargo(request):
             return redirect(f"{reverse('lista_cargos')}?q={cargo.descricao}")
     else:
         form = CargoForm()
-        return render(request, 'gestao_pessoal/cargos/criar_cargo.html', {'form': form})
+    return render(request, 'gestao_pessoal/cargos/criar_cargo.html', {'form': form})
 
 def editar_cargo(request, pk):
     cargo = get_object_or_404(Cargo, pk=pk)
@@ -86,7 +86,7 @@ def criar_funcionario(request):
         form = FuncionarioForm(request.POST)
         if form.is_valid():
             funcionario = form.save()
-            return redirect(f"{reverse('lista_clientes')}?q={funcionario.cpf}")
+            return redirect(f"{reverse('lista_funcionarios')}?q={funcionario.cpf}")
     else:
         form = FuncionarioForm()
     return render(request, 'gestao_pessoal/funcionarios/criar_funcionario.html', {'form': form})
