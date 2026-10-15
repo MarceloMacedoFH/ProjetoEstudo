@@ -70,12 +70,18 @@ PREFIXOS = {
     "excluir": "delete", "deletar": "delete", "remover": "delete", "apagar": "delete",
 }
 
-# Áreas de gestão da empresa (dados sensíveis de funcionários, como CPF, RG e salário):
-# qualquer URL cujo nome contenha uma destas palavras é exclusiva do administrador,
-# o mesmo critério que já esconde esses itens do menu para quem não é superusuário.
-PALAVRAS_SOMENTE_ADMIN = {"cargo", "cargos", "funcionario", "funcionarios"}
+# Áreas administrativas: qualquer URL cujo nome contenha uma destas palavras é exclusiva
+# do administrador, o mesmo critério que já esconde esses itens do menu.
+#  - cargos/funcionários: dados sensíveis (CPF, RG, salário);
+#  - grupos: quem edita um grupo consegue dar permissões a si mesmo (escalada de privilégio).
+PALAVRAS_SOMENTE_ADMIN = {"cargo", "cargos", "funcionario", "funcionarios", "grupo", "grupos"}
 
 PERMISSOES_POR_URL = {
     "autocomplete_produtos": PERMISSOES_DISPONIBILIDADE,
     "verificar_disponibilidade": PERMISSOES_DISPONIBILIDADE,
+    # Mudanças de status da locação (o nome não contém um módulo reconhecível,
+    # então sem estas linhas ficariam liberadas para qualquer usuário logado).
+    "marcar_prova_agendada": "locacoes.change_locacao",
+    "marcar_retirada": "locacoes.change_locacao",
+    "marcar_devolvido_item": "locacoes.change_locacao",
 }
