@@ -3,7 +3,8 @@ from django.urls import reverse
 from .models import Cliente
 from .forms import ClienteForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.db.models import Q
+from django.db.models import ProtectedError, Q
+from django.contrib import messages
 
 def lista_clientes(request):
     query = request.GET.get('q')
@@ -50,6 +51,15 @@ def editar_cliente(request, pk):
 def excluir_cliente(request, pk):
     cliente = get_object_or_404(Cliente, pk=pk)
     if request.method == 'POST':
-        cliente.delete()
+        try:
+            cliente.delete()
+        except ProtectedError:
+            # O editar_cliente.html já exibe as mensagens, então voltamos para ele.
+            messages.error(
+                request,
+                f'Não é possível excluir o cliente "{cliente.nome}" porque ele possui '
+                f'locações registradas. Inative o cliente em vez de excluir.'
+            )
+            return redirect('editar_cliente', pk=cliente.pk)
         return redirect('lista_clientes')
     return render(request, 'clientes/confirmar_exclusao.html', {'cliente': cliente})

@@ -84,6 +84,12 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        # IMMEDIATE: a transação já nasce com o bloqueio de escrita, então a checagem de
+        # disponibilidade + gravação da locação (transaction.atomic) não sofre corrida
+        # entre dois atendentes.
+        'OPTIONS': {
+            'transaction_mode': 'IMMEDIATE',
+        },
     }
 }
 

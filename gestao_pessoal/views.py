@@ -1,4 +1,5 @@
-from django.db.models import Q
+from django.contrib import messages
+from django.db.models import ProtectedError, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from .models import Funcionario, Cargo
@@ -53,7 +54,15 @@ def editar_cargo(request, pk):
 def excluir_cargo(request, pk):
     cargo = get_object_or_404(Cargo, pk=pk)
     if request.method == 'POST':
-        cargo.delete()
+        try:
+            cargo.delete()
+        except ProtectedError:
+            messages.error(
+                request,
+                f'Não é possível excluir o cargo "{cargo.descricao}" porque ele está em uso '
+                f'por funcionários. Desmarque o status do cargo em vez de excluir.'
+            )
+            return redirect('editar_cargo', pk=cargo.pk)
         return redirect('lista_cargos')
     return render(request, 'gestao_pessoal/cargos/confirmar_exclusao.html', {'cargo': cargo})
 

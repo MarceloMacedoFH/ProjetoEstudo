@@ -165,10 +165,11 @@ class Locacao(models.Model):
 
     def atualizar_status_por_atraso(self, hoje):
         """
-        Chamar periodicamente (ex: via management command diário) para
-        marcar como Atrasada qualquer locação com item vencido e não devolvido.
+        Chamada pelo comando diário `atualizar_atrasos`: marca como Atrasada a
+        locação já retirada que tem item vencido e não devolvido. Locações ainda
+        não retiradas (reservada/prova), canceladas ou devolvidas nunca ficam atrasadas.
         """
-        if self.status in (self.STATUS_CANCELADA, self.STATUS_DEVOLVIDA):
+        if self.status != self.STATUS_RETIRADA:
             return
         tem_item_atrasado = self.itens.filter(
             data_devolucao_real_item__isnull=True,

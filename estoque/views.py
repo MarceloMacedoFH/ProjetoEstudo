@@ -6,6 +6,8 @@ from django.db.models import F, Q, ProtectedError
 from django.db.models.functions import Coalesce
 from django.contrib import messages
 from django.urls import reverse
+from django.utils import timezone
+from locacoes.models import ItemLocacao, Locacao
 from .models import Categoria, Status, Conservacao, Cor, Produto, Tecido
 from .forms import CategoriaForm, StatusForm, ConservacaoForm, CorForm, ProdutoForm, TecidoForm
 
@@ -20,8 +22,7 @@ def _url_lista(nome_url, query=None):
 
 #HOME
 def home(request):
-    # Por enquanto retornamos valores fictícios até que as tabelas de 
-    # agendamentos e locações sejam criadas no models.py
+    hoje = timezone.localdate()
     context = {
         'total_provas': 0,
         'total_retiradas': 0,
@@ -29,6 +30,44 @@ def home(request):
         'total_atrasos': 0,
         'total_alugados': 0,
     }
+
+    ver_locacoes = request.user.has_perm('locacoes.view_locacao')
+    ver_itens = request.user.has_perm('locacoes.view_itemlocacao')
+
+    # Locações que ainda não saíram da loja
+    antes_da_retirada = [Locacao.STATUS_RESERVADA, Locacao.STATUS_PROVA_AGENDADA]
+    # Peças que ainda não voltaram
+    nao_devolvidos = ItemLocacao.objects.filter(data_devolucao_real_item__isnull=True)
+
+    # Mesmas regras de permissão dos cards no home.html
+    if ver_locacoes or ver_itens:
+        context['total_provas'] = Locacao.objects.filter(
+            data_prova=hoje, status__in=antes_da_retirada
+        ).count()
+
+    if ver_locacoes:
+        # Aluguéis fechados hoje (cancelados não contam)
+        context['total_alugados'] = (
+            Locacao.objects.filter(data_fechamento=hoje)
+            .exclude(status=Locacao.STATUS_CANCELADA)
+            .count()
+        )
+        # Peças que devem sair hoje e ainda não foram retiradas
+        context['total_retiradas'] = ItemLocacao.objects.filter(
+            locacao__data_retirada=hoje, locacao__status__in=antes_da_retirada
+        ).count()
+        # Peças que devem voltar hoje
+        context['total_devolucoes'] = nao_devolvidos.filter(
+            locacao__data_devolucao_prevista=hoje,
+            locacao__status=Locacao.STATUS_RETIRADA,
+        ).count()
+        # Peças vencidas e não devolvidas. Conta pela data (não só pelo status),
+        # então o card fica correto mesmo antes do comando diário rodar.
+        context['total_atrasos'] = nao_devolvidos.filter(
+            locacao__status__in=[Locacao.STATUS_RETIRADA, Locacao.STATUS_ATRASADA],
+            locacao__data_devolucao_prevista__lt=hoje,
+        ).count()
+
     return render(request, 'home.html', context)
 
 

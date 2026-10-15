@@ -3,6 +3,7 @@ from datetime import datetime
 
 from django.contrib import messages
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db import transaction
 from django.db.models import Q, Value
 from django.db.models.functions import Replace
 from django.http import JsonResponse
@@ -59,7 +60,17 @@ def criar_locacao(request):
             locacao = form.save(commit=False)
             locacao.calcular_datas()
 
-            conflitos = _checar_conflitos_formset(formset, locacao)
+            # Checagem de conflito e gravação na MESMA transação: se dois atendentes
+            # tentarem reservar a mesma peça ao mesmo tempo, o segundo enxerga a
+            # reserva do primeiro e é barrado (ver _travar_produtos e settings).
+            with transaction.atomic():
+                _travar_produtos(formset)
+                conflitos = _checar_conflitos_formset(formset, locacao)
+                if not conflitos:
+                    locacao.save()
+                    formset.instance = locacao
+                    formset.save()
+
             if conflitos:
                 messages.error(
                     request,
@@ -67,9 +78,6 @@ def criar_locacao(request):
                     f'escolhido: {", ".join(conflitos)}.'
                 )
             else:
-                locacao.save()
-                formset.instance = locacao
-                formset.save()
                 messages.success(request, 'Locação criada com sucesso.')
                 return redirect('editar_locacao', pk=locacao.pk)
     else:
@@ -96,9 +104,15 @@ def editar_locacao(request, pk):
             locacao_editada = form.save(commit=False)
             locacao_editada.calcular_datas()
 
-            conflitos = _checar_conflitos_formset(
-                formset, locacao_editada, ignorar_locacao=locacao
-            )
+            with transaction.atomic():
+                _travar_produtos(formset)
+                conflitos = _checar_conflitos_formset(
+                    formset, locacao_editada, ignorar_locacao=locacao
+                )
+                if not conflitos:
+                    locacao_editada.save()
+                    formset.save()
+
             if conflitos:
                 messages.error(
                     request,
@@ -106,8 +120,6 @@ def editar_locacao(request, pk):
                     f'escolhido: {", ".join(conflitos)}.'
                 )
             else:
-                locacao_editada.save()
-                formset.save()
                 messages.success(request, 'Locação atualizada com sucesso.')
                 return redirect('editar_locacao', pk=locacao.pk)
     else:
@@ -119,6 +131,24 @@ def editar_locacao(request, pk):
         'formset': formset,
         'locacao': locacao,
     })
+
+
+def _travar_produtos(formset):
+    """
+    Trava (SELECT ... FOR UPDATE) os produtos da locação até o fim da transação,
+    para que duas locações simultâneas da mesma peça sejam processadas uma por vez.
+    No SQLite isso não tem efeito (o banco já serializa as gravações via
+    transaction_mode IMMEDIATE, configurado no settings); no PostgreSQL/MySQL
+    é este bloqueio que garante a proteção.
+    """
+    ids = {
+        item_form.cleaned_data['produto'].pk
+        for item_form in formset
+        if item_form.cleaned_data.get('produto')
+        and not item_form.cleaned_data.get('DELETE')
+    }
+    if ids:
+        list(Produto.objects.select_for_update().filter(pk__in=ids).order_by('pk'))
 
 
 def _checar_conflitos_formset(formset, locacao, ignorar_locacao=None):
@@ -192,11 +222,16 @@ def marcar_devolvido_item(request, item_pk):
     if request.method == 'POST':
         data_str = request.POST.get('data_devolucao_real_item')
         if data_str:
-            item.data_devolucao_real_item = datetime.strptime(data_str, '%Y-%m-%d').date()
+            try:
+                item.data_devolucao_real_item = datetime.strptime(data_str, '%Y-%m-%d').date()
+            except ValueError:
+                messages.error(request, 'Data de devolução inválida.')
+                return redirect('editar_locacao', pk=item.locacao_id)
         else:
             item.data_devolucao_real_item = timezone.localdate()
-        item.save()
-        item.locacao.verificar_conclusao()
+        with transaction.atomic():
+            item.save()
+            item.locacao.verificar_conclusao()
         messages.success(request, f'Devolução de "{item.produto}" registrada.')
     return redirect('editar_locacao', pk=item.locacao_id)
 
